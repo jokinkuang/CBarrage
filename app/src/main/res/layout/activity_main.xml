@@ -21,8 +21,17 @@
         android:layout_height="wrap_content">
         <Button
             android:id="@+id/addBtn"
-            android:text="Add a Barrage"
+            android:text="Add a Text Barrage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
-    </LinearLayout>
+        <Button
+            android:id="@+id/addImageBtn"
+            android:text="Add a Image Barrage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:id="@+id/addByTimerBtn"
+            android:text="Add Image Barrage By Timer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>    </LinearLayout>
 </FrameLayout>

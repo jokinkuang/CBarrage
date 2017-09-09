@@ -5,7 +5,9 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.animation.LinearInterpolator;
 
 import java.lang.ref.WeakReference;
@@ -15,12 +17,13 @@ import java.lang.ref.WeakReference;
  */
 
 public class BarrageItem {
-    private BarrageRow mRow;
+    private static final String TAG = "BarrageItem";
 
+    private BarrageRow mRow;
     private WeakReference<View> mContentView;
-    private RLAnimator mRLAnimator = new RLAnimator();
     private ObjectAnimator mAnimator = new ObjectAnimator();
     private AnimatorListener mAnimatorListener = new AnimatorListener();
+    private TreeObserver observer = new TreeObserver(this);
 
 
     public interface BarrageItemListener {
@@ -37,17 +40,8 @@ public class BarrageItem {
         mListener = listener;
     }
 
-
     protected int mDistance = 0;
     protected int mDuration = 0;
-
-    public void setRow(BarrageRow row) {
-        mRow = row;
-    }
-    @Nullable
-    public BarrageRow getRow() {
-        return mRow;
-    }
 
     public int getDistance() {
         return mDistance;
@@ -65,12 +59,12 @@ public class BarrageItem {
         this.mDuration = duration;
     }
 
-    public void recycle() {
-        mContentView = null;
-        mAnimator.cancel();
+    public void setRow(BarrageRow row) {
+        mRow = row;
     }
-
-    public void onUpdate() {
+    @Nullable
+    public BarrageRow getRow() {
+        return mRow;
     }
 
     public void setContentView(View view) {
@@ -84,19 +78,37 @@ public class BarrageItem {
         return mContentView.get();
     }
 
+    public BarrageItem() {
+        mAnimator.addUpdateListener(mAnimatorListener);
+        mAnimator.addListener(mAnimatorListener);
+        mAnimator.setInterpolator(new LinearInterpolator());
+    }
+
+    public void recycle() {
+        mContentView = null;
+        mAnimator.cancel();
+    }
+
     public void start() {
         if (mContentView == null || mContentView.get() == null) {
+            Log.e(TAG, "fetal error. content view is null");
+            return;
+        }
+        mContentView.get().getViewTreeObserver().addOnGlobalLayoutListener(observer);
+    }
+
+    private void realStart() {
+        if (mContentView == null || mContentView.get() == null) {
+            Log.e(TAG, "fetal error. content view is null");
             return;
         }
 
+        mContentView.get().setY(mRow.getRowTop());
+
         mAnimator.setTarget(mContentView.get());
         mAnimator.setPropertyName("translationX");
-        mAnimator.setFloatValues(mDistance, 0);
+        mAnimator.setFloatValues(mDistance, -mContentView.get().getWidth());
         mAnimator.setDuration(mDuration);
-        mAnimator.setInterpolator(new LinearInterpolator());
-
-        mAnimator.addUpdateListener(mAnimatorListener);
-        mAnimator.addListener(mAnimatorListener);
 
         mAnimator.start();
     }
@@ -129,12 +141,33 @@ public class BarrageItem {
         }
     }
 
+    public void onLayoutFinish() {
+        realStart();
+    }
+
+
+    private static class TreeObserver implements ViewTreeObserver.OnGlobalLayoutListener {
+        private WeakReference<BarrageItem> mItem = new WeakReference<BarrageItem>(null);
+
+        public TreeObserver(BarrageItem view) {
+            mItem = new WeakReference<BarrageItem>(view);
+        }
+        @Override
+        public void onGlobalLayout() {
+            if (mItem.get() != null) {
+                // only trigger once
+                mItem.get().getContentView().getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                mItem.get().onLayoutFinish();
+                return;
+            }
+            Log.d(TAG, "fetal error!!!");
+        }
+    }
 
     private class AnimatorListener extends AnimatorListenerAdapter
             implements ValueAnimator.AnimatorUpdateListener {
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
-            onUpdate();
             if (mListener != null) {
                 mListener.onAnimationUpdate(BarrageItem.this);
             }

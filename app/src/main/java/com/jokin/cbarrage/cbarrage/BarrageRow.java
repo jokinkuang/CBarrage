@@ -25,6 +25,10 @@ public class BarrageRow {
     @NonNull
     private WeakReference<ViewGroup> mContainerView = new WeakReference<ViewGroup>(null);
 
+    private int mRowIndex = -1;
+    private int mRowTop = 0;
+    private int mRowBottom = 0;
+
     private int mHeight = 0;
     private int mWidth = 0;
 
@@ -61,6 +65,30 @@ public class BarrageRow {
         this.mWidth = width;
     }
 
+    public int getRowIndex() {
+        return mRowIndex;
+    }
+
+    public void setRowIndex(int rowIndex) {
+        this.mRowIndex = rowIndex;
+    }
+
+    public int getRowTop() {
+        return mRowTop;
+    }
+
+    public void setRowTop(int rowTop) {
+        this.mRowTop = rowTop;
+    }
+
+    public int getRowBottom() {
+        return mRowBottom;
+    }
+
+    public void setRowBottom(int rowBottom) {
+        this.mRowBottom = rowBottom;
+    }
+
     public int getItemGap() {
         return mItemGap;
     }
@@ -91,22 +119,21 @@ public class BarrageRow {
 
 
     public void appendItem(View view) {
-        // add view to container
-        if (mContainerView.get() != null) {
-            mContainerView.get().addView(view);
-        }
-
         BarrageItem item = obtainBarrageItem();
+        item.setRow(this);
         item.setContentView(view);
         item.setDistance(mWidth);
         item.setDuration(mItemSpeed);
         item.setListener(mItemListener);
+        item.start();
 
-        // add to Items before start(), for start() may cause a update() immediately
         mItems.addLast(item);
 
         Log.d(TAG, String.format("distance %d speed %d", mWidth, mItemSpeed));
-        item.start();
+        // add view to container the last!! for listen its layout
+        if (mContainerView.get() != null) {
+            mContainerView.get().addView(view);
+        }
     }
 
     private BarrageItem obtainBarrageItem() {
@@ -121,12 +148,13 @@ public class BarrageRow {
     }
 
     public void onItemFinish(BarrageItem item) {
-        // add view to container
+        Log.d(TAG, "remove item "+item.toString());
+        // remove view from container first!!
         if (mContainerView.get() != null) {
             mContainerView.get().removeView(item.getContentView());
         }
-
         mItems.remove(item);
+        mRecycleBin.add(item);
     }
 
     private void checkIdle() {
@@ -146,14 +174,14 @@ public class BarrageRow {
         if (contentView == null) {
             return true;
         }
-        if (contentView.getX() == 0) {
-            // means the last item was adding to container
-            return false;
-        }
         //  |---[ItemWidth ItemGap]--|
-        Log.d(TAG, String.format("x %f l %d w %d g %d", contentView.getX(), contentView.getLeft(),
-                mWidth, mItemGap));
         if (contentView.getX() + contentView.getWidth() + mItemGap <= mWidth) {
+            // Log.d(TAG, String.format("Idle x %f l %d w %d g %d sw %d", contentView.getX(), contentView.getLeft(),
+            //         contentView.getWidth(), mItemGap, mWidth));
+            if (contentView.getX() == 0) {
+                // means the last item was out of screen
+                return false;
+            }
             return true;
         }
         return false;

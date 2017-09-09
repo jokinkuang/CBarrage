@@ -109,8 +109,16 @@ public class CBarrageView extends FrameLayout {
             row.setItemSpeed(mRowSpeed);
             row.setItemGap(mItemGap);
 
+            row.setRowIndex(i);
+            row.setRowTop(getRowTopByIndex(i));
+            row.setRowBottom(row.getRowTop()+mRowHeight);
+
             row.setRowListener(mRowListener);
         }
+    }
+
+    private int getRowTopByIndex(int index) {
+        return index * (mRowHeight + mRowGap);
     }
 
     // //
@@ -144,7 +152,6 @@ public class CBarrageView extends FrameLayout {
     }
 
     public void onRowIdle(BarrageRow row) {
-        Log.d(TAG, "idle pendingsize "+mPendingQueue.size());
         if (mIsPrepared == false || mIsStarted == false) {
             return;
         }
@@ -173,6 +180,7 @@ public class CBarrageView extends FrameLayout {
      * add a barrage
      **/
     public void addBarrage(View view) {
+        Log.d(TAG, "add pendingsize "+mPendingQueue.size());
         if (mIsStarted == false || mIsPrepared == false) {
             mPendingQueue.add(view);
             return;
@@ -183,9 +191,11 @@ public class CBarrageView extends FrameLayout {
         }
         BarrageRow row = getIdleRow();
         if (row == null) {
+            Log.d(TAG, "add pendingsize row is null");
             mPendingQueue.add(view);
             return;
         }
+        Log.d(TAG, "start");
         addBarrageToRow(row, view);
     }
 
