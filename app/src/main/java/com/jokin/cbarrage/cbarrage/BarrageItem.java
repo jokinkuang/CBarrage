@@ -41,7 +41,7 @@ public class BarrageItem {
     }
 
     protected int mDistance = 0;
-    protected int mDuration = 0;
+    protected int mSpeed = 0;
 
     public int getDistance() {
         return mDistance;
@@ -51,12 +51,12 @@ public class BarrageItem {
         this.mDistance = distance;
     }
 
-    public int getDuration() {
-        return mDuration;
+    public int getSpeed() {
+        return mSpeed;
     }
 
-    public void setDuration(int duration) {
-        this.mDuration = duration;
+    public void setSpeed(int speed) {
+        this.mSpeed = speed;
     }
 
     public void setRow(BarrageRow row) {
@@ -108,9 +108,16 @@ public class BarrageItem {
         mAnimator.setTarget(mContentView.get());
         mAnimator.setPropertyName("translationX");
         mAnimator.setFloatValues(mDistance, -mContentView.get().getWidth());
-        mAnimator.setDuration(mDuration);
+        mAnimator.setDuration(getDurationBySpeed(mSpeed));
 
         mAnimator.start();
+    }
+
+    /**
+     * 不同宽度的物体，划过同一个窗口，规定了总时间，以此获取对应的速度
+     **/
+    private long getDurationBySpeed(int speed) {
+        return (long) ((mDistance + mContentView.get().getWidth()) / (mDistance*1.0) * speed);
     }
 
     public void pause() {

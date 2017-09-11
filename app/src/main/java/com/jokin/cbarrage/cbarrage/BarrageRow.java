@@ -123,7 +123,7 @@ public class BarrageRow {
         item.setRow(this);
         item.setContentView(view);
         item.setDistance(mWidth);
-        item.setDuration(mItemSpeed);
+        item.setSpeed(mItemSpeed);
         item.setListener(mItemListener);
         item.start();
 

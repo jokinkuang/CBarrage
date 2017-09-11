@@ -51,6 +51,9 @@ public class CBarrageView extends FrameLayout {
     private int mItemGap;
 
 
+    /**
+     * @param speed 划完一行需要的时间(ms)
+     **/
     public void setRowSpeed(int speed) {
         this.mRowSpeed = speed;
         createRowsIfNotExist();
