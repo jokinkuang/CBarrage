@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Queue;
 
 /**
+ * 1. 弹幕
+ * 2. 霸屏弹幕动画
  * Created by jokinkuang on 2017/9/8.
  */
 
@@ -26,6 +28,7 @@ public class CBarrageView extends FrameLayout {
 
     private List<CBarrageRow> mRows = new ArrayList<>(20);
     private Queue<View> mPendingQueue = new ArrayDeque<>(100);
+    private Queue<View> mPendingPriorityQueue = new ArrayDeque<>(100);
     private TreeObserver observer = new TreeObserver(this);
 
     private RowListener mRowListener = new RowListener(this);
@@ -183,10 +186,13 @@ public class CBarrageView extends FrameLayout {
         if (mIsPrepared == false || mIsStarted == false) {
             return;
         }
-        if (mPendingQueue.isEmpty()) {
+        if (! mPendingPriorityQueue.isEmpty()) {
+            addBarrageToRow(row, mPendingPriorityQueue.poll());
             return;
-        } else {
+        }
+        if (! mPendingQueue.isEmpty()) {
             addBarrageToRow(row, mPendingQueue.poll());
+            return;
         }
     }
 
@@ -198,14 +204,19 @@ public class CBarrageView extends FrameLayout {
         }
         // start before prepared
         if (mIsStarted) {
-            if (mPendingQueue.isEmpty() == false) {
+            if (! mPendingPriorityQueue.isEmpty()) {
+                addPriorityBarrage(mPendingPriorityQueue.poll());
+                return;
+            }
+            if (! mPendingQueue.isEmpty()) {
                 addBarrage(mPendingQueue.poll());
+                return;
             }
         }
     }
 
     /**
-     * add a barrage
+     * add a barrage normal
      **/
     public void addBarrage(View view) {
         Log.d(TAG, "add pendingsize "+mPendingQueue.size());
@@ -227,8 +238,55 @@ public class CBarrageView extends FrameLayout {
         addBarrageToRow(row, view);
     }
 
+    /**
+     * add a more high level barrage which would be added as fast
+     **/
+    public void addPriorityBarrage(View view) {
+        if (mIsStarted == false || mIsPrepared == false) {
+            mPendingPriorityQueue.add(view);
+            return;
+        }
+        if (mPendingPriorityQueue.isEmpty() == false) {
+            mPendingPriorityQueue.add(view);
+            return;
+        }
+        CBarrageRow row = getIdleRow();
+        if (row == null) {
+            Log.d(TAG, "add pendingsize row is null");
+            mPendingPriorityQueue.add(view);
+            return;
+        }
+        Log.d(TAG, "start");
+        addBarrageToRow(row, view);
+    }
+
     private void addBarrageToRow(CBarrageRow row, View view) {
         row.appendItem(view);
+    }
+
+    /**
+     * 动画需要预知下一次插入的行
+     **/
+    public CBarrageRow peekNextIdleRow() {
+        CBarrageRow row = getIdleRow();
+        if (row != null) {
+            return row;
+        } else {
+            if (mRows.isEmpty()) {
+                return null;
+            }
+            if (mRows.size() == 1) {
+                return mRows.get(0);
+            }
+            CBarrageRow nextIdleRow = mRows.get(0);
+            for (int i = 1; i < mRows.size(); ++i) {
+                row = mRows.get(i);
+                if (row.peekNextIdleTime() < nextIdleRow.peekNextIdleTime()) {
+                    nextIdleRow = row;
+                }
+            }
+            return nextIdleRow;
+        }
     }
 
     private CBarrageRow getIdleRow() {

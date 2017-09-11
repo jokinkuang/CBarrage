@@ -43,6 +43,12 @@ public class MainActivity extends AppCompatActivity {
                 addBarrage();
             }
         });
+        findViewById(R.id.addPriorityBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addPriorityBarrage();
+            }
+        });
         findViewById(R.id.addImageBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -78,6 +84,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mBarrageView.addBarrage(textView);
+    }
+
+    private void addPriorityBarrage() {
+        TextView textView = new TextView(this);
+        num += 1;
+        textView.setText("这是一条优先弹幕"+num);
+        textView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "clicked", Toast.LENGTH_SHORT).show();
+            }
+        });
+        mBarrageView.addPriorityBarrage(textView);
     }
 
     private void addImageBarrage() {

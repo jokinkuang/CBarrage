@@ -189,7 +189,7 @@ public class CBarrageRow {
             // Log.d(TAG, String.format("Idle x %f l %d w %d g %d sw %d", contentView.getX(), contentView.getLeft(),
             //         contentView.getWidth(), mItemGap, mWidth));
             if (contentView.getX() == 0) {
-                // means the last item was out of screen
+                // means the last item was adding
                 return false;
             }
             return true;
@@ -197,6 +197,29 @@ public class CBarrageRow {
         return false;
     }
 
+    /**
+     * @return 距离下一次空闲时间，当前空闲返回0
+     **/
+    public int peekNextIdleTime() {
+        CBarrageItem lastItem = getLastItem();
+        if (lastItem == null) {
+            return 0;
+        }
+        View contentView = lastItem.getContentView();
+        if (contentView == null) {
+            return 0;
+        }
+        //  |---[ItemWidth ItemGap]--|
+        int moveDist = (int) ((contentView.getX() + contentView.getWidth() + mItemGap) - mWidth);
+        if (moveDist <= 0) {
+            if (contentView.getX() == 0) {
+                // means the last item was adding
+                return lastItem.getSpeed();
+            }
+            return 0;
+        }
+        return (int) (moveDist*1.0/mWidth * lastItem.getSpeed());
+    }
 
     @Nullable
     private CBarrageItem getLastItem() {
