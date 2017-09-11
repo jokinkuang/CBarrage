@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPrepared(CBarrageView view) {
                 view.setItemGap(10);
-                view.setRowNum(5);
+                view.setRowNum(1);
                 view.setRowHeight(100);
                 view.setRowSpeed(5000);
 

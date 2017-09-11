@@ -52,26 +52,34 @@ public class CBarrageView extends FrameLayout {
 
 
     /**
-     * @param speed 划完一行需要的时间(ms)
+     * @param speed 划完一行需要的时间(ms)，行宽为弹幕视图宽度
      **/
     public void setRowSpeed(int speed) {
         this.mRowSpeed = speed;
         createRowsIfNotExist();
     }
+
     public int getRowSpeed() {
         return mRowSpeed;
     }
 
+
+    /**
+     * @param height 行高(dp)
+     */
     public void setRowHeight(int height) {
-        this.mRowHeight = height;
+        this.mRowHeight = CBarrageUtil.dip2px(getContext(), height);
         createRowsIfNotExist();
     }
     public int getRowHeight() {
         return mRowHeight;
     }
 
+    /**
+     * @param gap 行距(dp)
+     **/
     public void setRowGap(int gap) {
-        this.mRowGap = gap;
+        this.mRowGap = CBarrageUtil.dip2px(getContext(), gap);
         createRowsIfNotExist();
     }
     public int getRowGap() {
@@ -86,9 +94,11 @@ public class CBarrageView extends FrameLayout {
         return mRows;
     }
 
-
+    /**
+     * @param gap 弹幕间距(dp)
+     **/
     public void setItemGap(int gap) {
-        mItemGap = gap;
+        mItemGap = CBarrageUtil.dip2px(getContext(), gap);
         createRowsIfNotExist();
     }
     public int getItemGap() {
