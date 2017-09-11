@@ -3,6 +3,7 @@ package com.jokin.cbarrage;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
             public void onPrepared(CBarrageView view) {
                 view.setItemGap(10);
                 view.setRowNum(3);
+                view.setItemGravity(Gravity.BOTTOM);
                 view.setRowHeight(100);
                 view.setRowSpeed(5000);
 

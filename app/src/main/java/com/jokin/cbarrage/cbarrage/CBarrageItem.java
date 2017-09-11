@@ -6,6 +6,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.LinearInterpolator;
@@ -42,6 +43,7 @@ public class CBarrageItem {
 
     protected int mDistance = 0;
     protected int mSpeed = 0;
+    protected int mGravity = 0;
 
     public int getDistance() {
         return mDistance;
@@ -57,6 +59,14 @@ public class CBarrageItem {
 
     public void setSpeed(int speed) {
         this.mSpeed = speed;
+    }
+
+    public void setGravity(int gravity) {
+        mGravity = gravity;
+    }
+
+    public int getGravity() {
+        return mGravity;
     }
 
     public void setRow(CBarrageRow row) {
@@ -103,7 +113,7 @@ public class CBarrageItem {
             return;
         }
 
-        mContentView.get().setY(mRow.getRowTop());
+        mContentView.get().setY(getTopByGravity(mGravity));
 
         mAnimator.setTarget(mContentView.get());
         mAnimator.setPropertyName("translationX");
@@ -111,6 +121,21 @@ public class CBarrageItem {
         mAnimator.setDuration(getDurationBySpeed(mSpeed));
 
         mAnimator.start();
+    }
+
+    /**
+     * 坐标 相对于 当前行的Top或Bottom 定位
+     **/
+    private int getTopByGravity(int gravity) {
+        switch (gravity) {
+            case Gravity.TOP:
+                return mRow.getRowTop();
+            case Gravity.BOTTOM:
+                return mRow.getRowBottom() - mContentView.get().getHeight();
+            case Gravity.CENTER:
+            default:
+                return mRow.getRowTop() + (mRow.getHeight() - mContentView.get().getHeight())/2;
+        }
     }
 
     /**

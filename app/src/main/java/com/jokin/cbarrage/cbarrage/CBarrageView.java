@@ -1,10 +1,12 @@
 package com.jokin.cbarrage.cbarrage;
 
 import android.content.Context;
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
@@ -49,6 +51,7 @@ public class CBarrageView extends FrameLayout {
     private int mRowSpeed;
 
     private int mItemGap;
+    private int mItemGravity;
 
 
     /**
@@ -106,6 +109,17 @@ public class CBarrageView extends FrameLayout {
     }
 
 
+    /**
+     * @param gravity Gravity.TOP / Gravity.CENTER / Gravity.BOTTOM
+     */
+    public void setItemGravity(int gravity) {
+        mItemGravity = gravity;
+    }
+    public int getItemGravity() {
+        return mItemGravity;
+    }
+
+
     private void createRowsIfNotExist() {
         if (mRows.size() < mRowNum) {
             for (int i = 0; i < mRowNum - mRows.size(); ++i) {
@@ -121,6 +135,7 @@ public class CBarrageView extends FrameLayout {
             row.setContainerView(this);
             row.setItemSpeed(mRowSpeed);
             row.setItemGap(mItemGap);
+            row.setItemGravity(mItemGravity);
 
             row.setRowIndex(i);
             row.setRowTop(getRowTopByIndex(i));

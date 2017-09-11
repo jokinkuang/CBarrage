@@ -34,6 +34,7 @@ public class CBarrageRow {
 
     private int mItemGap = 0;
     private int mItemSpeed = 0;
+    private int mItemGravity = 0;
 
 
     public interface BarrageRowListener {
@@ -105,6 +106,14 @@ public class CBarrageRow {
         this.mItemSpeed = itemSpeed;
     }
 
+    public void setItemGravity(int itemGravity) {
+        this.mItemGravity = itemGravity;
+    }
+
+    public int getItemGravity() {
+        return mItemGravity;
+    }
+
     public void setContainerView(ViewGroup view) {
         mContainerView = new WeakReference<ViewGroup>(view);
     }
@@ -124,6 +133,7 @@ public class CBarrageRow {
         item.setContentView(view);
         item.setDistance(mWidth);
         item.setSpeed(mItemSpeed);
+        item.setGravity(mItemGravity);
         item.setListener(mItemListener);
         item.start();
 
