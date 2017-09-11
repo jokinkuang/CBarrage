@@ -16,10 +16,10 @@ import java.lang.ref.WeakReference;
  * Created by jokinkuang on 2017/9/8.
  */
 
-public class BarrageItem {
-    private static final String TAG = "BarrageItem";
+public class CBarrageItem {
+    private static final String TAG = "CBarrageItem";
 
-    private BarrageRow mRow;
+    private CBarrageRow mRow;
     private WeakReference<View> mContentView;
     private ObjectAnimator mAnimator = new ObjectAnimator();
     private AnimatorListener mAnimatorListener = new AnimatorListener();
@@ -27,13 +27,13 @@ public class BarrageItem {
 
 
     public interface BarrageItemListener {
-        void onAnimationCancel(BarrageItem item);
-        void onAnimationEnd(BarrageItem item);
-        void onAnimationRepeat(BarrageItem item);
-        void onAnimationStart(BarrageItem item);
-        void onAnimationPause(BarrageItem item);
-        void onAnimationResume(BarrageItem item);
-        void onAnimationUpdate(BarrageItem item);
+        void onAnimationCancel(CBarrageItem item);
+        void onAnimationEnd(CBarrageItem item);
+        void onAnimationRepeat(CBarrageItem item);
+        void onAnimationStart(CBarrageItem item);
+        void onAnimationPause(CBarrageItem item);
+        void onAnimationResume(CBarrageItem item);
+        void onAnimationUpdate(CBarrageItem item);
     }
     private BarrageItemListener mListener;
     public void setListener(BarrageItemListener listener) {
@@ -59,11 +59,11 @@ public class BarrageItem {
         this.mSpeed = speed;
     }
 
-    public void setRow(BarrageRow row) {
+    public void setRow(CBarrageRow row) {
         mRow = row;
     }
     @Nullable
-    public BarrageRow getRow() {
+    public CBarrageRow getRow() {
         return mRow;
     }
 
@@ -78,7 +78,7 @@ public class BarrageItem {
         return mContentView.get();
     }
 
-    public BarrageItem() {
+    public CBarrageItem() {
         mAnimator.addUpdateListener(mAnimatorListener);
         mAnimator.addListener(mAnimatorListener);
         mAnimator.setInterpolator(new LinearInterpolator());
@@ -154,10 +154,10 @@ public class BarrageItem {
 
 
     private static class TreeObserver implements ViewTreeObserver.OnGlobalLayoutListener {
-        private WeakReference<BarrageItem> mItem = new WeakReference<BarrageItem>(null);
+        private WeakReference<CBarrageItem> mItem = new WeakReference<CBarrageItem>(null);
 
-        public TreeObserver(BarrageItem view) {
-            mItem = new WeakReference<BarrageItem>(view);
+        public TreeObserver(CBarrageItem view) {
+            mItem = new WeakReference<CBarrageItem>(view);
         }
         @Override
         public void onGlobalLayout() {
@@ -176,49 +176,49 @@ public class BarrageItem {
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
             if (mListener != null) {
-                mListener.onAnimationUpdate(BarrageItem.this);
+                mListener.onAnimationUpdate(CBarrageItem.this);
             }
         }
 
         @Override
         public void onAnimationCancel(Animator animation) {
             if (mListener != null) {
-                mListener.onAnimationCancel(BarrageItem.this);
+                mListener.onAnimationCancel(CBarrageItem.this);
             }
         }
 
         @Override
         public void onAnimationEnd(Animator animation) {
             if (mListener != null) {
-                mListener.onAnimationEnd(BarrageItem.this);
+                mListener.onAnimationEnd(CBarrageItem.this);
             }
         }
 
         @Override
         public void onAnimationRepeat(Animator animation) {
             if (mListener != null) {
-                mListener.onAnimationRepeat(BarrageItem.this);
+                mListener.onAnimationRepeat(CBarrageItem.this);
             }
         }
 
         @Override
         public void onAnimationStart(Animator animation) {
             if (mListener != null) {
-                mListener.onAnimationStart(BarrageItem.this);
+                mListener.onAnimationStart(CBarrageItem.this);
             }
         }
 
         @Override
         public void onAnimationPause(Animator animation) {
             if (mListener != null) {
-                mListener.onAnimationPause(BarrageItem.this);
+                mListener.onAnimationPause(CBarrageItem.this);
             }
         }
 
         @Override
         public void onAnimationResume(Animator animation) {
             if (mListener != null) {
-                mListener.onAnimationResume(BarrageItem.this);
+                mListener.onAnimationResume(CBarrageItem.this);
             }
         }
     }

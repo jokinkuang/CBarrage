@@ -22,7 +22,7 @@ import java.util.Queue;
 public class CBarrageView extends FrameLayout {
     private static final String TAG = "CBarrageView";
 
-    private List<BarrageRow> mRows = new ArrayList<>(20);
+    private List<CBarrageRow> mRows = new ArrayList<>(20);
     private Queue<View> mPendingQueue = new ArrayDeque<>(100);
     private TreeObserver observer = new TreeObserver(this);
 
@@ -90,7 +90,7 @@ public class CBarrageView extends FrameLayout {
         mRowNum = num;
         createRowsIfNotExist();
     }
-    public List<BarrageRow> getRows() {
+    public List<CBarrageRow> getRows() {
         return mRows;
     }
 
@@ -109,12 +109,12 @@ public class CBarrageView extends FrameLayout {
     private void createRowsIfNotExist() {
         if (mRows.size() < mRowNum) {
             for (int i = 0; i < mRowNum - mRows.size(); ++i) {
-                BarrageRow row = new BarrageRow();
+                CBarrageRow row = new CBarrageRow();
                 mRows.add(row);
             }
         }
         for (int i = 0; i < mRows.size(); ++i) {
-            BarrageRow row = mRows.get(i);
+            CBarrageRow row = mRows.get(i);
             row.setWidth(getWidth());
             row.setHeight(mRowHeight);
 
@@ -164,7 +164,7 @@ public class CBarrageView extends FrameLayout {
         }
     }
 
-    public void onRowIdle(BarrageRow row) {
+    public void onRowIdle(CBarrageRow row) {
         if (mIsPrepared == false || mIsStarted == false) {
             return;
         }
@@ -202,7 +202,7 @@ public class CBarrageView extends FrameLayout {
             mPendingQueue.add(view);
             return;
         }
-        BarrageRow row = getIdleRow();
+        CBarrageRow row = getIdleRow();
         if (row == null) {
             Log.d(TAG, "add pendingsize row is null");
             mPendingQueue.add(view);
@@ -212,13 +212,13 @@ public class CBarrageView extends FrameLayout {
         addBarrageToRow(row, view);
     }
 
-    private void addBarrageToRow(BarrageRow row, View view) {
+    private void addBarrageToRow(CBarrageRow row, View view) {
         row.appendItem(view);
     }
 
-    private BarrageRow getIdleRow() {
+    private CBarrageRow getIdleRow() {
         for (int i = 0; i < mRows.size(); ++i) {
-            BarrageRow row = mRows.get(i);
+            CBarrageRow row = mRows.get(i);
             if (row.isIdle()) {
                 return row;
             }
@@ -243,7 +243,7 @@ public class CBarrageView extends FrameLayout {
         }
     }
 
-    private static class RowListener implements BarrageRow.BarrageRowListener {
+    private static class RowListener implements CBarrageRow.BarrageRowListener {
         private WeakReference<CBarrageView> mView = new WeakReference<CBarrageView>(null);
 
         public RowListener(CBarrageView view) {
@@ -251,7 +251,7 @@ public class CBarrageView extends FrameLayout {
         }
 
         @Override
-        public void onRowIdle(BarrageRow row) {
+        public void onRowIdle(CBarrageRow row) {
             if (mView.get() != null) {
                 mView.get().onRowIdle(row);
             }

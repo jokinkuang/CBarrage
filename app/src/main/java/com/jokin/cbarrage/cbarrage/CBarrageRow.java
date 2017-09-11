@@ -14,12 +14,12 @@ import java.util.Deque;
  * Created by jokinkuang on 2017/9/8.
  */
 
-public class BarrageRow {
-    private static final String TAG = "BarrageRow";
+public class CBarrageRow {
+    private static final String TAG = "CBarrageRow";
 
     // | head ... tail |
-    private Deque<BarrageItem> mItems = new ArrayDeque<>();
-    private Deque<BarrageItem> mRecycleBin = new ArrayDeque<>();
+    private Deque<CBarrageItem> mItems = new ArrayDeque<>();
+    private Deque<CBarrageItem> mRecycleBin = new ArrayDeque<>();
     private ItemListener mItemListener = new ItemListener();
 
     @NonNull
@@ -37,7 +37,7 @@ public class BarrageRow {
 
 
     public interface BarrageRowListener {
-        void onRowIdle(BarrageRow row);
+        void onRowIdle(CBarrageRow row);
     }
     private BarrageRowListener mListener;
     public void setRowListener(BarrageRowListener listener) {
@@ -45,9 +45,9 @@ public class BarrageRow {
     }
 
 
-    private BarrageItem mFirstItem;
-    private BarrageItem mCenterItem;
-    private BarrageItem mLastItem;
+    private CBarrageItem mFirstItem;
+    private CBarrageItem mCenterItem;
+    private CBarrageItem mLastItem;
 
     public int getHeight() {
         return mHeight;
@@ -111,7 +111,7 @@ public class BarrageRow {
 
     public void clear() {
         for (int i = 0; i < mItems.size(); ++i) {
-            BarrageItem item = mItems.poll();
+            CBarrageItem item = mItems.poll();
             item.recycle();
             mRecycleBin.add(item);
         }
@@ -119,7 +119,7 @@ public class BarrageRow {
 
 
     public void appendItem(View view) {
-        BarrageItem item = obtainBarrageItem();
+        CBarrageItem item = obtainBarrageItem();
         item.setRow(this);
         item.setContentView(view);
         item.setDistance(mWidth);
@@ -136,18 +136,18 @@ public class BarrageRow {
         }
     }
 
-    private BarrageItem obtainBarrageItem() {
+    private CBarrageItem obtainBarrageItem() {
         if (mRecycleBin.isEmpty()) {
-            return new BarrageItem();
+            return new CBarrageItem();
         }
         return mRecycleBin.poll();
     }
 
-    public void onItemUpdate(BarrageItem item) {
+    public void onItemUpdate(CBarrageItem item) {
         checkIdle();
     }
 
-    public void onItemFinish(BarrageItem item) {
+    public void onItemFinish(CBarrageItem item) {
         Log.d(TAG, "remove item "+item.toString());
         // remove view from container first!!
         if (mContainerView.get() != null) {
@@ -166,7 +166,7 @@ public class BarrageRow {
     }
 
     public boolean isIdle() {
-        BarrageItem lastItem = getLastItem();
+        CBarrageItem lastItem = getLastItem();
         if (lastItem == null) {
             return true;
         }
@@ -189,46 +189,46 @@ public class BarrageRow {
 
 
     @Nullable
-    private BarrageItem getLastItem() {
+    private CBarrageItem getLastItem() {
         if (mItems.isEmpty()) {
             return null;
         }
         return mItems.peekLast();
     }
 
-    private class ItemListener implements BarrageItem.BarrageItemListener {
+    private class ItemListener implements CBarrageItem.BarrageItemListener {
         @Override
-        public void onAnimationCancel(BarrageItem item) {
+        public void onAnimationCancel(CBarrageItem item) {
             onItemFinish(item);
         }
 
         @Override
-        public void onAnimationEnd(BarrageItem item) {
+        public void onAnimationEnd(CBarrageItem item) {
             onItemFinish(item);
         }
 
         @Override
-        public void onAnimationRepeat(BarrageItem item) {
+        public void onAnimationRepeat(CBarrageItem item) {
 
         }
 
         @Override
-        public void onAnimationStart(BarrageItem item) {
+        public void onAnimationStart(CBarrageItem item) {
 
         }
 
         @Override
-        public void onAnimationPause(BarrageItem item) {
+        public void onAnimationPause(CBarrageItem item) {
 
         }
 
         @Override
-        public void onAnimationResume(BarrageItem item) {
+        public void onAnimationResume(CBarrageItem item) {
 
         }
 
         @Override
-        public void onAnimationUpdate(BarrageItem item) {
+        public void onAnimationUpdate(CBarrageItem item) {
             onItemUpdate(item);
         }
     }
