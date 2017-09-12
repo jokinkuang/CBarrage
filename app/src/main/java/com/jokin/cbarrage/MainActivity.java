@@ -37,6 +37,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.dumpBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBarrageView.dumpMemory();
+            }
+        });
+        findViewById(R.id.clearBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBarrageView.clear();
+            }
+        });
         findViewById(R.id.addBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -112,30 +124,34 @@ public class MainActivity extends AppCompatActivity {
             if (b == null || !b) {
                 mAddByTimerBtn.setText("stop timer");
                 timer = new Timer();
-                timer.schedule(new AsyncAddTask(), 0, 100);
+                timer.schedule(new AsyncAddTask(), 0, 200);
                 mAddByTimerBtn.setTag(true);
+                isStop = false;
             } else {
                 mAddByTimerBtn.setText("add by timer");
                 mAddByTimerBtn.setTag(false);
+                isStop = true;
             }
     }
 
+    private volatile boolean isStop = false;
     Timer timer = new Timer();
     class AsyncAddTask extends TimerTask {
         @Override
         public void run() {
             for (int i = 0; i < 200; ++i) {
-
-            SystemClock.sleep(100);
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    addImageBarrage();
-
-                    // mBarrageView.setItemGap(new Random().nextInt() % 100 + 50);
+                if (isStop) {
+                    return;
                 }
-            });
+                SystemClock.sleep(100);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        addImageBarrage();
+
+                        // mBarrageView.setItemGap(new Random().nextInt() % 100 + 50);
+                    }
+                });
             }
         }
     };

@@ -125,9 +125,13 @@ public class CBarrageRow {
     }
 
     public void clear() {
-        for (int i = 0; i < mItems.size(); ++i) {
+        while (mItems.size() > 0) {
             CBarrageItem item = mItems.poll();
-            item.recycle();
+            // remove view from container
+            if (mContainerView.get() != null) {
+                mContainerView.get().removeView(item.getContentView());
+            }
+            item.clear();
             mRecycleBin.add(item);
         }
     }
@@ -146,7 +150,7 @@ public class CBarrageRow {
         mItems.addLast(item);
 
         Log.d(TAG, String.format("distance %d speed %d", mWidth, mItemSpeed));
-        // add view to container the last!! for listen its layout
+        // add view to container
         if (mContainerView.get() != null) {
             mContainerView.get().addView(view);
         }
@@ -185,12 +189,13 @@ public class CBarrageRow {
 
     public void onItemFinish(CBarrageItem item) {
         Log.d(TAG, "remove item "+item.toString());
-        // remove view from container first!!
+        // remove view from container
         if (mContainerView.get() != null) {
             mContainerView.get().removeView(item.getContentView());
         }
-        mItems.remove(item);
-        mRecycleBin.add(item);
+        if (mItems.remove(item)) {
+            mRecycleBin.add(item);
+        }
     }
 
     public boolean isIdle() {
@@ -250,7 +255,6 @@ public class CBarrageRow {
     private class ItemListener implements CBarrageItem.BarrageItemListener {
         @Override
         public void onAnimationCancel(CBarrageItem item) {
-            onItemFinish(item);
         }
 
         @Override
@@ -282,5 +286,14 @@ public class CBarrageRow {
         public void onAnimationUpdate(CBarrageItem item) {
             onItemUpdate(item);
         }
+    }
+
+    /**
+     * For Debug
+     */
+    public void dumpMemory() {
+        String TAG = "dump";
+        Log.d(TAG, String.format("Row index %d itemCount %d recycleBinCount %d pendingQueueSize %d",
+                getRowIndex(), getItemCount(), mRecycleBin.size(), mPendingPriorityQueue.size()));
     }
 }

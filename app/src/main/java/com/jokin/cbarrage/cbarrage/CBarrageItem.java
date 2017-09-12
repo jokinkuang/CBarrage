@@ -94,7 +94,7 @@ public class CBarrageItem {
         mAnimator.setInterpolator(new LinearInterpolator());
     }
 
-    public void recycle() {
+    public void clear() {
         mContentView = null;
         mAnimator.cancel();
     }

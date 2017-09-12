@@ -452,4 +452,23 @@ public class CBarrageView extends FrameLayout {
             }
         }
     }
+
+
+    /**
+     * For Debug
+     */
+    public void dumpMemory() {
+        String TAG = "dump";
+        Log.d(TAG, "*************** Dump Memory **************");
+        Log.d(TAG, String.format("Barrage children view count %d", getChildCount()));
+        Log.d(TAG, String.format("pendingQueueSize %d pendingPriorityQueueSize %d ",
+                mPendingQueue.size(), mPendingPriorityQueue.size()));
+
+        Log.d(TAG, String.format("Barrage rows count %d", mRows.size()));
+        for (int i = 0; i < mRows.size(); ++i) {
+            CBarrageRow row = mRows.get(i);
+            row.dumpMemory();
+        }
+        Log.d(TAG, "*************** End **************");
+    }
 }
