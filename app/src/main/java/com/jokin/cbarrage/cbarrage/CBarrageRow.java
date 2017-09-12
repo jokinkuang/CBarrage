@@ -146,6 +146,18 @@ public class CBarrageRow {
         mContainerView = new WeakReference<ViewGroup>(view);
     }
 
+    public void pause() {
+        for (CBarrageItem item : mItems) {
+            item.pause();
+        }
+    }
+
+    public void resume() {
+        for (CBarrageItem item : mItems) {
+            item.resume();
+        }
+    }
+
     public void clear() {
         while (mItems.size() > 0) {
             CBarrageItem item = mItems.poll();

@@ -146,9 +146,11 @@ public class CBarrageItem {
     }
 
     public void pause() {
-        if (mAnimator != null) {
-            mAnimator.pause();
-        }
+        mAnimator.pause();
+    }
+
+    public void resume() {
+        mAnimator.resume();
     }
 
     public void cancel() {

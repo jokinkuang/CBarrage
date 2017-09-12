@@ -58,6 +58,18 @@ public class MainActivity extends AppCompatActivity {
                 mBarrageView.dumpMemory();
             }
         });
+        findViewById(R.id.pauseBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBarrageView.pause();
+            }
+        });
+        findViewById(R.id.resumeBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBarrageView.resume();
+            }
+        });
         findViewById(R.id.clearBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

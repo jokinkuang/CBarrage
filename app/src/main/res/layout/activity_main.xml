@@ -41,33 +41,43 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button
+            android:id="@+id/pauseBtn"
+            android:text="Pause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:id="@+id/resumeBtn"
+            android:text="Resume"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
             android:id="@+id/clearBtn"
             android:text="Clear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button
             android:id="@+id/addBtn"
-            android:text="Add a Text"
+            android:text="AddText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button
             android:id="@+id/addPriorityBtn"
-            android:text="Add a Priority Text"
+            android:text="AddPriorityText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button
             android:id="@+id/addImageBtn"
-            android:text="Add a Image"
+            android:text="AddImage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button
             android:id="@+id/addBBBtn"
-            android:text="Add a BB"
+            android:text="AddBB"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button
             android:id="@+id/addByTimerBtn"
-            android:text="Add Image By Timer"
+            android:text="AddImageByTimer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>    </LinearLayout>
 </FrameLayout>

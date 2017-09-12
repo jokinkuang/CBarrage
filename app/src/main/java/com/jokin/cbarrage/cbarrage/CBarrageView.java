@@ -197,6 +197,18 @@ public class CBarrageView extends FrameLayout {
         }
     }
 
+    public void pause() {
+        for (int i = 0; i < mRows.size(); ++i) {
+            mRows.get(i).pause();
+        }
+    }
+
+    public void resume() {
+        for (int i = 0; i < mRows.size(); ++i) {
+            mRows.get(i).resume();
+        }
+    }
+
     public void clear() {
         mPendingQueue.clear();
         for (int i = 0; i < mRows.size(); ++i) {
