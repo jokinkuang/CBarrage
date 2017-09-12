@@ -129,12 +129,12 @@ public class CBarrageItem {
     private int getTopByGravity(int gravity) {
         switch (gravity) {
             case Gravity.TOP:
-                return mRow.getRowTop();
+                return mRow.getTop();
             case Gravity.BOTTOM:
-                return mRow.getRowBottom() - mContentView.get().getHeight();
+                return mRow.getBottom() - mContentView.get().getHeight();
             case Gravity.CENTER:
             default:
-                return mRow.getRowTop() + (mRow.getHeight() - mContentView.get().getHeight())/2;
+                return mRow.getTop() + (mRow.getHeight() - mContentView.get().getHeight())/2;
         }
     }
 

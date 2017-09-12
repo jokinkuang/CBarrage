@@ -27,12 +27,14 @@ public class CBarrageRow {
     @NonNull
     private WeakReference<ViewGroup> mContainerView = new WeakReference<ViewGroup>(null);
 
-    private int mRowIndex = -1;
-    private int mRowTop = 0;
-    private int mRowBottom = 0;
+    private int mIndex = -1;
 
     private int mHeight = 0;
     private int mWidth = 0;
+    private int mLeft = 0;
+    private int mRight = 0;
+    private int mTop = 0;
+    private int mBottom = 0;
 
     private int mItemGap = 0;
     private int mItemSpeed = 0;
@@ -68,28 +70,48 @@ public class CBarrageRow {
         this.mWidth = width;
     }
 
-    public int getRowIndex() {
-        return mRowIndex;
+    public int getLeft() {
+        return mLeft;
     }
 
-    public void setRowIndex(int rowIndex) {
-        this.mRowIndex = rowIndex;
+    public void setLeft(int left) {
+        mLeft = left;
     }
 
-    public int getRowTop() {
-        return mRowTop;
+    public int getRight() {
+        return mRight;
     }
 
-    public void setRowTop(int rowTop) {
-        this.mRowTop = rowTop;
+    public void setRight(int right) {
+        mRight = right;
     }
 
-    public int getRowBottom() {
-        return mRowBottom;
+    public int getIndex() {
+        return mIndex;
     }
 
-    public void setRowBottom(int rowBottom) {
-        this.mRowBottom = rowBottom;
+    public void setIndex(int rowIndex) {
+        this.mIndex = rowIndex;
+    }
+
+    public int getTop() {
+        return mTop;
+    }
+
+    public void setTop(int rowTop) {
+        this.mTop = rowTop;
+    }
+
+    public int getBottom() {
+        return mBottom;
+    }
+
+    public void setBottom(int rowBottom) {
+        this.mBottom = rowBottom;
+    }
+
+    public int getRowPendingSize() {
+        return mPendingPriorityQueue.size();
     }
 
     public int getItemCount() {
@@ -156,6 +178,11 @@ public class CBarrageRow {
         }
     }
 
+    /**
+     * 行优先队列，比View优先队列更优先
+     * 仅用于动画，确保动画消失所在的行会出现对应的动画对象
+     * @param view
+     */
     public void appendPriorityItem(View view) {
         if (! mPendingPriorityQueue.isEmpty()) {
             mPendingPriorityQueue.add(view);
@@ -294,6 +321,6 @@ public class CBarrageRow {
     public void dumpMemory() {
         String TAG = "dump";
         Log.d(TAG, String.format("Row index %d itemCount %d recycleBinCount %d pendingQueueSize %d",
-                getRowIndex(), getItemCount(), mRecycleBin.size(), mPendingPriorityQueue.size()));
+                getIndex(), getItemCount(), mRecycleBin.size(), mPendingPriorityQueue.size()));
     }
 }

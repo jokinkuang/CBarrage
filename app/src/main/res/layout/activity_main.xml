@@ -17,6 +17,20 @@
 
     </com.jokin.cbarrage.cbarrage.CBarrageView>
 
+    <FrameLayout
+        android:id="@+id/bbFrame"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone">
+        <ImageView
+            android:id="@+id/img"
+            android:layout_width="380dp"
+            android:layout_height="380dp"
+            android:src="@drawable/img"
+            android:scaleType="fitXY"/>
+    </FrameLayout>
+
     <LinearLayout
         android:layout_gravity="bottom|center_horizontal"
         android:layout_width="wrap_content"
@@ -44,6 +58,11 @@
         <Button
             android:id="@+id/addImageBtn"
             android:text="Add a Image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:id="@+id/addBBBtn"
+            android:text="Add a BB"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button
