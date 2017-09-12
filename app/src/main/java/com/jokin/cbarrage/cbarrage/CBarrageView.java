@@ -16,6 +16,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Random;
 
 /**
  * 1. 弹幕
@@ -44,11 +45,14 @@ public class CBarrageView extends FrameLayout {
         mListener = listener;
     }
 
+    public static final int NORMAL = 0;
+    public static final int AVERAGE = 1;
+    private int mBarrageMode = NORMAL;
 
     private boolean mIsStarted;
     private boolean mIsPrepared;
 
-    private int mRowNum;
+    private int mRowNum = 1;
     private int mRowGap;
     private int mRowHeight;
     private int mRowSpeed;
@@ -56,6 +60,17 @@ public class CBarrageView extends FrameLayout {
     private int mItemGap;
     private int mItemGravity;
 
+
+    /**
+     * @param mode 设置弹幕的布局方式 正常/平均
+     **/
+    public void setMode(int mode) {
+        mBarrageMode = mode;
+    }
+
+    public int getMode() {
+        return mBarrageMode;
+    }
 
     /**
      * @param speed 划完一行需要的时间(ms)，行宽为弹幕视图宽度
@@ -92,7 +107,14 @@ public class CBarrageView extends FrameLayout {
         return mRowGap;
     }
 
+    /**
+     * Default is 1
+     * @param num
+     */
     public void setRowNum(int num) {
+        if (num < 1) {
+            return;
+        }
         mRowNum = num;
         createRowsIfNotExist();
     }
@@ -134,8 +156,8 @@ public class CBarrageView extends FrameLayout {
             CBarrageRow row = mRows.get(i);
             row.setWidth(getWidth());
             row.setHeight(mRowHeight);
-
             row.setContainerView(this);
+
             row.setItemSpeed(mRowSpeed);
             row.setItemGap(mItemGap);
             row.setItemGravity(mItemGravity);
@@ -165,6 +187,7 @@ public class CBarrageView extends FrameLayout {
     }
 
     private void initView() {
+        createRowsIfNotExist();
         getViewTreeObserver().addOnGlobalLayoutListener(observer);
     }
 
@@ -261,11 +284,60 @@ public class CBarrageView extends FrameLayout {
     }
 
     private void addBarrageToRow(CBarrageRow row, View view) {
-        row.appendItem(view);
+        if (mBarrageMode == NORMAL) {
+            row.appendItem(view);
+        } else {
+            row = getInsertRow();
+            row.appendItem(view);
+        }
+    }
+
+    /**
+     * 一奇葩需求，动画要消失到插入的行，但事实上，如果插入非常快，插入的动画形成队列，
+     * 此时要预判队列里所有动画要插入的行，这非常困难，因为下一次插入的行，与队列中前面的弹幕的宽度相关。
+     * 宽度越长占用的行的时间越长。所以每个弹幕需要计算队列前面所有弹幕消失时机，虽然能够做到，但这种策略太复杂。
+     * 所以，干脆就让每行维护一个优先队列。
+     **/
+    public CBarrageRow addBarrageToRow(View view) {
+        if (mRows.isEmpty()) {
+            Log.e(TAG, "fetal error!!! should not be here.");
+            return null;
+        }
+        if (mIsStarted == false || mIsPrepared == false) {
+            mRows.get(0).appendPriorityItem(view);
+            return mRows.get(0);
+        }
+        return null;
+    }
+
+    /**
+     * 非正常弹幕的接口，要平均弹幕到各行，优先级为：
+     * 1. 行空闲才能插入
+     * 2. 空闲的行中，行弹幕数量少的优先插入
+     * 3. 数量相等，随机（坑爹）
+     **/
+    private CBarrageRow getInsertRow() {
+        Log.d(TAG, "rows:"+mRows.size());
+        List<CBarrageRow> rows = getIdleRows();
+        Log.d(TAG, "idle: "+rows);
+        if (! rows.isEmpty()) {
+            rows = getLessItemRowsInIdle(rows);
+            Log.d(TAG, "less: "+rows);
+            if (rows.size() == 1) {
+                return rows.get(0);
+            }
+            // scale 10 times to make random more random
+            return rows.get(getRandomInt(0, rows.size()*10-1) / 10);
+        } else {
+            // would not be here !!
+            Log.e(TAG, "fetal error! should not be here!");
+            return null;
+        }
     }
 
     /**
      * 动画需要预知下一次插入的行
+     * @deprecated 接口不成立，短时间内会返回同一行，不准确。废弃。
      **/
     public CBarrageRow peekNextIdleRow() {
         CBarrageRow row = getIdleRow();
@@ -298,6 +370,56 @@ public class CBarrageView extends FrameLayout {
         }
         return null;
     }
+
+    // 优先级接口 //
+
+    private List<CBarrageRow> getIdleRows() {
+        List<CBarrageRow> rows = new ArrayList<>(10);
+        for (int i = 0; i < mRows.size(); ++i) {
+            CBarrageRow row = mRows.get(i);
+            if (row.isIdle()) {
+                rows.add(row);
+            }
+        }
+        return rows;
+    }
+
+    private List<CBarrageRow> getLessItemRowsInIdle(List<CBarrageRow> rows) {
+        List<CBarrageRow> minRows = new ArrayList<>(10);
+        if (rows == null || rows.isEmpty()) {
+            return minRows;
+        }
+
+        minRows.add(rows.get(0));
+        for (int i = 1; i < rows.size(); ++i) {
+            CBarrageRow row = rows.get(i);
+            if (row.getItemCount() == minRows.get(0).getItemCount()) {
+                minRows.add(row);
+            } else if (row.getItemCount() < minRows.get(0).getItemCount()){
+                minRows.clear();
+                minRows.add(row);
+            }
+        }
+        return minRows;
+    }
+
+    /**
+     * @param min
+     * @param max if max > min, max would be reset to min
+     * @return [min,max]
+     */
+    private int getRandomInt(int min, int max) {
+        if (min >= max) {
+            max = min;
+        }
+        if (min < 0 || max <= 0) {
+            return 0;
+        }
+        int a =  new Random().nextInt(max)%(max-min+1) + min;
+        Log.d(TAG, String.format("max %d int %d a %d", max, min, a));
+        return a;
+    }
+
 
 
     private static class TreeObserver implements ViewTreeObserver.OnGlobalLayoutListener {

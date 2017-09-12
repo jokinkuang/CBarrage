@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Queue;
 
 /**
  * Created by jokinkuang on 2017/9/8.
@@ -21,6 +22,7 @@ public class CBarrageRow {
     private Deque<CBarrageItem> mItems = new ArrayDeque<>();
     private Deque<CBarrageItem> mRecycleBin = new ArrayDeque<>();
     private ItemListener mItemListener = new ItemListener();
+    private Queue<View> mPendingPriorityQueue = new ArrayDeque<>(100);
 
     @NonNull
     private WeakReference<ViewGroup> mContainerView = new WeakReference<ViewGroup>(null);
@@ -90,6 +92,10 @@ public class CBarrageRow {
         this.mRowBottom = rowBottom;
     }
 
+    public int getItemCount() {
+        return mItems.size();
+    }
+
     public int getItemGap() {
         return mItemGap;
     }
@@ -146,6 +152,18 @@ public class CBarrageRow {
         }
     }
 
+    public void appendPriorityItem(View view) {
+        if (! mPendingPriorityQueue.isEmpty()) {
+            mPendingPriorityQueue.add(view);
+            return;
+        }
+        if (! isIdle()) {
+            mPendingPriorityQueue.add(view);
+            return;
+        }
+        appendItem(view);
+    }
+
     private CBarrageItem obtainBarrageItem() {
         if (mRecycleBin.isEmpty()) {
             return new CBarrageItem();
@@ -154,7 +172,15 @@ public class CBarrageRow {
     }
 
     public void onItemUpdate(CBarrageItem item) {
-        checkIdle();
+        if (isIdle()) {
+            if (! mPendingPriorityQueue.isEmpty()) {
+                appendItem(mPendingPriorityQueue.poll());
+                return;
+            }
+            if (mListener != null) {
+                mListener.onRowIdle(this);
+            }
+        }
     }
 
     public void onItemFinish(CBarrageItem item) {
@@ -165,14 +191,6 @@ public class CBarrageRow {
         }
         mItems.remove(item);
         mRecycleBin.add(item);
-    }
-
-    private void checkIdle() {
-        if (isIdle()) {
-            if (mListener != null) {
-                mListener.onRowIdle(this);
-            }
-        }
     }
 
     public boolean isIdle() {

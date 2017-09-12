@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
                 view.setItemGravity(Gravity.BOTTOM);
                 view.setRowHeight(100);
                 view.setRowSpeed(5000);
+                view.setMode(CBarrageView.AVERAGE);
 
                 view.start();
             }
