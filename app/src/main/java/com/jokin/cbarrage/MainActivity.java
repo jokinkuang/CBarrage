@@ -3,24 +3,21 @@ package com.jokin.cbarrage;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.jokin.cbarrage.cbarrage.CBarrageRow;
 import com.jokin.cbarrage.cbarrage.CBarrageView;
@@ -31,6 +28,7 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
     private CBarrageView mBarrageView;
+    private BarrageDataAdapter mBarrageAdapter;
     private FrameLayout mBBFrame;
     private Button mAddByTimerBtn;
 
@@ -101,6 +99,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        mBarrageAdapter = new BarrageDataAdapter();
+        mBarrageView.setAdapter(mBarrageAdapter);
         mBarrageView.setListener(new CBarrageView.CBarrageViewListener() {
             @Override
             public void onPrepared(CBarrageView view) {
@@ -119,38 +120,47 @@ public class MainActivity extends AppCompatActivity {
     private int num = 0;
 
     private void addBarrage() {
-        TextView textView = new TextView(this);
-        num += 1;
-        textView.setText("这是一条弹幕"+num);
-        textView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "clicked", Toast.LENGTH_SHORT).show();
-            }
-        });
-        mBarrageView.addBarrage(textView);
+        // TextView textView = new TextView(this);
+        // num += 1;
+        // textView.setText("这是一条弹幕"+num);
+        // textView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        // textView.setOnClickListener(new View.OnClickListener() {
+        //     @Override
+        //     public void onClick(View v) {
+        //         Toast.makeText(MainActivity.this, "clicked", Toast.LENGTH_SHORT).show();
+        //     }
+        // });
+        // mBarrageView.addBarrage(textView);
+
+        Barrage barrage = new Barrage();
+        barrage.type = Barrage.TEXT;
+        mBarrageAdapter.addBarrage(barrage);
     }
 
     private void addPriorityBarrage() {
-        TextView textView = new TextView(this);
-        num += 1;
-        textView.setText("这是一条优先弹幕"+num);
-        textView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "clicked", Toast.LENGTH_SHORT).show();
-            }
-        });
-        mBarrageView.addPriorityBarrage(textView);
+        // TextView textView = new TextView(this);
+        // num += 1;
+        // textView.setText("这是一条优先弹幕"+num);
+        // textView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        // textView.setOnClickListener(new View.OnClickListener() {
+        //     @Override
+        //     public void onClick(View v) {
+        //         Toast.makeText(MainActivity.this, "clicked", Toast.LENGTH_SHORT).show();
+        //     }
+        // });
+        Barrage barrage = new Barrage();
+        barrage.type = Barrage.TEXT;
+        mBarrageAdapter.addPriorityBarrage(barrage);
     }
 
     private void addImageBarrage() {
-        View view = this.getLayoutInflater().inflate(R.layout.barrage_image, mBarrageView, false);
-        ((TextView)view.findViewById(R.id.text)).setText("图片弹幕"+num);
-        num += 1;
-        mBarrageView.addBarrage(view);
+        // View view = this.getLayoutInflater().inflate(R.layout.barrage_image, mBarrageView, false);
+        // ((TextView)view.findViewById(R.id.text)).setText("图片弹幕"+num);
+        // num += 1;
+        // mBarrageView.addBarrage(view);
+        Barrage barrage = new Barrage();
+        barrage.type = Barrage.IMAGE;
+        mBarrageAdapter.addBarrage(barrage);
     }
 
     private void addBBBarrage() {
@@ -164,14 +174,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 // note memory leak
-                View view = MainActivity.this.getLayoutInflater().inflate(R.layout.barrage_image, mBarrageView, false);
-                view.setBackgroundColor(Color.YELLOW);
-                ((TextView)view.findViewById(R.id.text)).setText("霸屏弹幕"+num);
-                num += 1;
-                CBarrageRow row = mBarrageView.addRowBarrage(view);
+                // View view = MainActivity.this.getLayoutInflater().inflate(R.layout.barrage_image, mBarrageView, false);
+                // view.setBackgroundColor(Color.YELLOW);
+                // ((TextView)view.findViewById(R.id.text)).setText("霸屏弹幕"+num);
+                // num += 1;
+                // CBarrageRow row = mBarrageView.addRowBarrage(view);
+                Barrage barrage = new Barrage();
+                barrage.type = Barrage.IMAGE;
+                mBarrageAdapter.addBarrage(barrage);
 
                 // showBBAnimation(row.getLeft(), row.getTop());
-                startAnimation(row.getRight()/2, row.getTop());
+                // startAnimation(row.getRight()/2, row.getTop());
             }
         };
         timer.start();

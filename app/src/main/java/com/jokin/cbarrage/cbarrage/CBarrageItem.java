@@ -20,6 +20,7 @@ import java.lang.ref.WeakReference;
 public class CBarrageItem {
     private static final String TAG = "CBarrageItem";
 
+    private Object mData;
     private CBarrageRow mRow;
     private WeakReference<View> mContentView;
     private ObjectAnimator mAnimator = new ObjectAnimator();
@@ -67,6 +68,13 @@ public class CBarrageItem {
 
     public int getGravity() {
         return mGravity;
+    }
+
+    public void setData(Object data) {
+        mData = data;
+    }
+    public Object getData() {
+        return mData;
     }
 
     public void setRow(CBarrageRow row) {

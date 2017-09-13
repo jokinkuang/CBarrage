@@ -22,7 +22,7 @@ public class CBarrageRow {
     private Deque<CBarrageItem> mItems = new ArrayDeque<>();
     private Deque<CBarrageItem> mRecycleBin = new ArrayDeque<>();
     private ItemListener mItemListener = new ItemListener();
-    private Queue<View> mPendingPriorityQueue = new ArrayDeque<>(100);
+    private Queue<Object> mPendingPriorityQueue = new ArrayDeque<>(100);
 
     @NonNull
     private WeakReference<ViewGroup> mContainerView = new WeakReference<ViewGroup>(null);
@@ -42,6 +42,8 @@ public class CBarrageRow {
 
 
     public interface BarrageRowListener {
+        View onViewCreate(CBarrageRow row, Object obj);
+        void onViewDestroy(CBarrageRow row, Object obj, @NonNull View view);
         void onRowIdle(CBarrageRow row);
     }
     private BarrageRowListener mListener;
@@ -159,11 +161,11 @@ public class CBarrageRow {
     }
 
     public void clear() {
+        mPendingPriorityQueue.clear();
         while (mItems.size() > 0) {
             CBarrageItem item = mItems.poll();
-            // remove view from container
-            if (mContainerView.get() != null) {
-                mContainerView.get().removeView(item.getContentView());
+            if (mListener != null && item.getContentView() != null) {
+                mListener.onViewDestroy(this, item.getData(), item.getContentView());
             }
             item.clear();
             mRecycleBin.add(item);
@@ -171,9 +173,19 @@ public class CBarrageRow {
     }
 
 
-    public void appendItem(View view) {
+    public void appendItem(Object obj) {
+        if (mListener == null) {
+            Log.e(TAG, "snbh. listener is null.");
+            return;
+        }
+        View view = mListener.onViewCreate(this, obj);
+        if (view == null) {
+            return;
+        }
+
         CBarrageItem item = obtainBarrageItem();
         item.setRow(this);
+        item.setData(obj);
         item.setContentView(view);
         item.setDistance(mWidth);
         item.setSpeed(mItemSpeed);
@@ -182,29 +194,24 @@ public class CBarrageRow {
         item.start();
 
         mItems.addLast(item);
-
         Log.d(TAG, String.format("distance %d speed %d", mWidth, mItemSpeed));
-        // add view to container
-        if (mContainerView.get() != null) {
-            mContainerView.get().addView(view);
-        }
     }
 
     /**
      * 行优先队列，比View优先队列更优先
      * 仅用于动画，确保动画消失所在的行会出现对应的动画对象
-     * @param view
+     * @param obj
      */
-    public void appendPriorityItem(View view) {
+    public void appendPriorityItem(Object obj) {
         if (! mPendingPriorityQueue.isEmpty()) {
-            mPendingPriorityQueue.add(view);
+            mPendingPriorityQueue.add(obj);
             return;
         }
         if (! isIdle()) {
-            mPendingPriorityQueue.add(view);
+            mPendingPriorityQueue.add(obj);
             return;
         }
-        appendItem(view);
+        appendItem(obj);
     }
 
     private CBarrageItem obtainBarrageItem() {
@@ -228,12 +235,12 @@ public class CBarrageRow {
 
     public void onItemFinish(CBarrageItem item) {
         Log.d(TAG, "remove item "+item.toString());
-        // remove view from container
-        if (mContainerView.get() != null) {
-            mContainerView.get().removeView(item.getContentView());
-        }
         if (mItems.remove(item)) {
             mRecycleBin.add(item);
+
+            if (mListener != null && item.getContentView() != null) {
+                mListener.onViewDestroy(this, item.getData(), item.getContentView());
+            }
         }
     }
 

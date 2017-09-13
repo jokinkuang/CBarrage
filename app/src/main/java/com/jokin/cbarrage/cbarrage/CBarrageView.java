@@ -26,9 +26,10 @@ public class CBarrageView extends FrameLayout {
     private static final String TAG = "CBarrageView";
 
     private List<CBarrageRow> mRows = new ArrayList<>(20);
-    private Queue<View> mPendingQueue = new ArrayDeque<>(100);
-    private Queue<View> mPendingPriorityQueue = new ArrayDeque<>(100);
+    private Queue<Object> mPendingQueue = new ArrayDeque<>(100);
+    private Queue<Object> mPendingPriorityQueue = new ArrayDeque<>(100);
     private TreeObserver observer = new TreeObserver(this);
+    private CBarrageDataAdapter mAdapter;
 
     private RowListener mRowListener = new RowListener(this);
 
@@ -68,6 +69,14 @@ public class CBarrageView extends FrameLayout {
 
     public int getMode() {
         return mBarrageMode;
+    }
+
+    public void setAdapter(CBarrageDataAdapter adapter) {
+        mAdapter = adapter;
+        mAdapter.setBarrageView(this);
+    }
+    public CBarrageDataAdapter getAdapter() {
+        return mAdapter;
     }
 
     /**
@@ -211,6 +220,7 @@ public class CBarrageView extends FrameLayout {
 
     public void clear() {
         mPendingQueue.clear();
+        mPendingPriorityQueue.clear();
         for (int i = 0; i < mRows.size(); ++i) {
             mRows.get(i).clear();
         }
@@ -233,6 +243,25 @@ public class CBarrageView extends FrameLayout {
             addBarrageToRow(getIdleRow(), mPendingQueue.poll());
             return;
         }
+    }
+
+    public View onViewCreate(CBarrageRow row, Object obj) {
+        if (mAdapter == null) {
+            return null;
+        }
+        View view = mAdapter.createView(this, obj);
+        // add view to container
+        addView(view);
+        return view;
+    }
+
+    public void onViewDestroy(CBarrageRow row, Object obj, View view) {
+        if (mAdapter == null) {
+            return;
+        }
+        // remove view from container
+        removeView(view);
+        mAdapter.destroyView(this, obj, view);
     }
 
     public void onLayoutFinish() {
@@ -260,46 +289,46 @@ public class CBarrageView extends FrameLayout {
     /**
      * add a barrage normal
      **/
-    public void addBarrage(View view) {
+    void addBarrage(Object obj) {
         Log.d(TAG, "add pendingsize "+mPendingQueue.size());
         if (mIsStarted == false || mIsPrepared == false) {
-            mPendingQueue.add(view);
+            mPendingQueue.add(obj);
             return;
         }
         if (mPendingQueue.isEmpty() == false) {
-            mPendingQueue.add(view);
+            mPendingQueue.add(obj);
             return;
         }
         CBarrageRow row = getIdleRow();
         if (row == null) {
             Log.d(TAG, "add pendingsize row is null");
-            mPendingQueue.add(view);
+            mPendingQueue.add(obj);
             return;
         }
         Log.d(TAG, "start");
-        addBarrageToRow(row, view);
+        addBarrageToRow(row, obj);
     }
 
     /**
      * add a more high level barrage which would be added as fast
      **/
-    public void addPriorityBarrage(View view) {
+    void addPriorityBarrage(Object obj) {
         if (mIsStarted == false || mIsPrepared == false) {
-            mPendingPriorityQueue.add(view);
+            mPendingPriorityQueue.add(obj);
             return;
         }
         if (mPendingPriorityQueue.isEmpty() == false) {
-            mPendingPriorityQueue.add(view);
+            mPendingPriorityQueue.add(obj);
             return;
         }
         CBarrageRow row = getIdleRow();
         if (row == null) {
             Log.d(TAG, "add pendingsize row is null");
-            mPendingPriorityQueue.add(view);
+            mPendingPriorityQueue.add(obj);
             return;
         }
         Log.d(TAG, "start");
-        addBarrageToRow(row, view);
+        addBarrageToRow(row, obj);
     }
 
     /**
@@ -310,14 +339,14 @@ public class CBarrageView extends FrameLayout {
      * 1. 有空闲行，直接插入
      * 2. 没空闲，行队列数量最少的插入
      **/
-    public CBarrageRow addRowBarrage(View view) {
+    CBarrageRow addRowBarrage(Object obj) {
         CBarrageRow row = getIdleRow();
         if (row != null) {
             if (mIsStarted == false || mIsPrepared == false) {
-                row.appendPriorityItem(view);
+                row.appendPriorityItem(obj);
             } else {
                 // show directly
-                addBarrageToRow(row, view);
+                addBarrageToRow(row, obj);
             }
         } else {
             // no idle rows add to queue.
@@ -329,9 +358,9 @@ public class CBarrageView extends FrameLayout {
                 row = rows.get(getRandomInt(0, rows.size() * 10 - 1) / 10);
             }
             if (mIsStarted == false || mIsPrepared == false) {
-                row.appendPriorityItem(view);
+                row.appendPriorityItem(obj);
             } else {
-                row.appendPriorityItem(view);
+                row.appendPriorityItem(obj);
             }
         }
         return row;
@@ -346,8 +375,8 @@ public class CBarrageView extends FrameLayout {
         return null;
     }
 
-    private void addBarrageToRow(CBarrageRow row, View view) {
-        row.appendItem(view);
+    private void addBarrageToRow(CBarrageRow row, Object obj) {
+        row.appendItem(obj);
     }
 
     private CBarrageRow getIdleRow() {
@@ -479,6 +508,21 @@ public class CBarrageView extends FrameLayout {
 
         public RowListener(CBarrageView view) {
             mView = new WeakReference<CBarrageView>(view);
+        }
+
+        @Override
+        public View onViewCreate(CBarrageRow row, Object obj) {
+            if (mView.get() != null) {
+                return mView.get().onViewCreate(row, obj);
+            }
+            return null;
+        }
+
+        @Override
+        public void onViewDestroy(CBarrageRow row, Object obj, @NonNull View view) {
+            if (mView.get() != null) {
+                mView.get().onViewDestroy(row, obj, view);
+            }
         }
 
         @Override
