@@ -30,6 +30,7 @@ public class CBarrageView extends FrameLayout {
     private Queue<Object> mPendingPriorityQueue = new ArrayDeque<>(100);
     private TreeObserver observer = new TreeObserver(this);
     private CBarrageDataAdapter mAdapter;
+    private CRecycleBin mRecycleBin = new CRecycleBin();
 
     private RowListener mRowListener = new RowListener(this);
 
@@ -249,10 +250,27 @@ public class CBarrageView extends FrameLayout {
         if (mAdapter == null) {
             return null;
         }
-        View view = mAdapter.createView(this, obj);
+        View view = mAdapter.createView(this, getViewFromCache(obj), obj);
+        // reset
+        if (view != null) {
+            view.setX(0);
+            view.setY(0);
+        }
         // add view to container
         addView(view);
         return view;
+    }
+
+    private View getViewFromCache(Object obj) {
+        if (mAdapter == null) {
+            return null;
+        }
+        for (int i = 0; i < mRecycleBin.size(); ++i) {
+            if (mAdapter.isViewFromObject(mRecycleBin.peek(i), obj)) {
+                return mRecycleBin.get(i);
+            }
+        }
+        return null;
     }
 
     public void onViewDestroy(CBarrageRow row, Object obj, View view) {
@@ -261,6 +279,7 @@ public class CBarrageView extends FrameLayout {
         }
         // remove view from container
         removeView(view);
+        mRecycleBin.add(view);
         mAdapter.destroyView(this, obj, view);
     }
 
@@ -534,6 +553,59 @@ public class CBarrageView extends FrameLayout {
     }
 
 
+    class CRecycleBin {
+        private static final int MAX = 50;
+        private List<View> mScrapHeap = new ArrayList<>(10);
+
+        public void add(View v) {
+            if (mScrapHeap.size() < MAX) {
+                mScrapHeap.add(v);
+            } else {
+                for (int i = 0; i < MAX/2 && i < mScrapHeap.size(); ++i) {
+                    mScrapHeap.remove(i);
+                }
+            }
+        }
+
+        public View get() {
+            return get(0);
+        }
+
+        View peek(int position) {
+            return mScrapHeap.get(position);
+        }
+
+        View get(int position) {
+            if (position < 0 || position >= mScrapHeap.size()) {
+                return null;
+            }
+            View result = mScrapHeap.get(position);
+            if (result != null) {
+                mScrapHeap.remove(position);
+            } else {
+            }
+            return result;
+        }
+
+        int size() {
+            return mScrapHeap.size();
+        }
+
+        void clear() {
+            final List<View> scrapHeap = mScrapHeap;
+
+            final int count = scrapHeap.size();
+            for (int i = 0; i < count; i++) {
+                final View view = scrapHeap.get(i);
+                if (view != null) {
+                    removeDetachedView(view, true);
+                }
+            }
+
+            scrapHeap.clear();
+        }
+    }
+
     /**
      * For Debug
      */
@@ -543,6 +615,11 @@ public class CBarrageView extends FrameLayout {
         Log.d(TAG, String.format("Barrage children view count %d", getChildCount()));
         Log.d(TAG, String.format("pendingQueueSize %d pendingPriorityQueueSize %d ",
                 mPendingQueue.size(), mPendingPriorityQueue.size()));
+
+        Log.d(TAG, String.format("Barrage recycleBin size %d", mRecycleBin.size()));
+        for (int i = 0; i < mRecycleBin.size(); ++i) {
+            Log.d(TAG, String.format("Item %d %s", i , mRecycleBin.peek(i)));
+        }
 
         Log.d(TAG, String.format("Barrage rows count %d", mRows.size()));
         for (int i = 0; i < mRows.size(); ++i) {

@@ -121,6 +121,7 @@ public class CBarrageItem {
             return;
         }
 
+        mContentView.get().setX(0);
         mContentView.get().setY(getTopByGravity(mGravity));
 
         mAnimator.setTarget(mContentView.get());
