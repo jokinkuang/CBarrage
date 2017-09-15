@@ -2,17 +2,27 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-    android:background="@color/colorAccent">
+              android:layout_height="wrap_content">
+
     <ImageView
-        android:id="@+id/img"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:src="@drawable/img"
-        android:scaleType="fitXY"/>
+        android:background="@drawable/bbscreen_image_head"/>
+
+    <RelativeLayout
+        android:layout_width="150dp"
+        android:layout_height="100dp"
+        android:layout_marginLeft="90dp">
+        <ImageView
+            android:id="@+id/img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/dg0001"
+            android:scaleType="fitStart"/>
+    </RelativeLayout>
     <TextView
+        android:layout_marginLeft="248dp"
         android:id="@+id/text"
-        android:layout_marginTop="80dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="文本文本"

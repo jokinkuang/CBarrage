@@ -106,10 +106,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPrepared(CBarrageView view) {
                 view.setItemGap(10);
-                view.setRowNum(3);
+                view.setRowNum(2);
                 view.setItemGravity(Gravity.BOTTOM);
-                view.setRowHeight(100);
-                view.setRowSpeed(5000);
+                view.setRowHeight(150);
+                view.setRowSpeed(8000);
                 view.setMode(CBarrageView.AVERAGE);
 
                 view.start();
