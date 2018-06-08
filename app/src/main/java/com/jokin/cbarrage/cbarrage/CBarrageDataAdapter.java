@@ -43,4 +43,11 @@ public abstract class CBarrageDataAdapter<T> {
         }
         mBarrageView.get().addRowBarrage(obj);
     }
+
+    public void addBarrageToRow(int rowIndex, T obj) {
+        if (mBarrageView.get() == null) {
+            return;
+        }
+        mBarrageView.get().addBarrageToRow(rowIndex, obj);
+    }
 }

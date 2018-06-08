@@ -1,6 +1,8 @@
 package com.jokin.cbarrage.cbarrage;
 
 import android.content.Context;
+import android.os.CountDownTimer;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -19,6 +21,7 @@ import java.util.Random;
 /**
  * 1. 弹幕(自然布局|平均布局)
  * 2. 霸屏弹幕动画
+ * 3. 弹幕循环（需要外部提供用于循环的数组，因为内部不保存已结束的弹幕）
  * Created by jokinkuang on 2017/9/8.
  */
 
@@ -32,6 +35,30 @@ public class CBarrageView extends FrameLayout {
     private CBarrageDataAdapter mAdapter;
     private CRecycleBin mRecycleBin = new CRecycleBin();
 
+    private boolean mIsLoopingMode;
+    private static final long LoopInterval = 100;
+    private Queue<Object> mLoopQueue = new ArrayDeque<>();
+    private static final long MAX_IDLE_TIME = 1*60*1000;   // 空闲时间要比一条弹幕的动画时间长！
+    private boolean mIsIdleTimerStarted = false;
+    private CountDownTimer mIdleCountDownTimer = new CountDownTimer(MAX_IDLE_TIME, MAX_IDLE_TIME) {
+        @Override
+        public void onTick(long l) {
+        }
+        @Override
+        public void onFinish() {
+            // @bugfix reset boolean when finish
+            mIsIdleTimerStarted = false;
+            mIsLoopingMode = true;
+            if (mListener != null) {
+                mListener.onIdle(MAX_IDLE_TIME, CBarrageView.this);
+            }
+            startLoop();
+        }
+    };
+    private void startLoop() {
+        onRowIdle(null);
+    }
+
     private RowListener mRowListener = new RowListener(this);
 
     public interface CBarrageViewListener {
@@ -39,6 +66,12 @@ public class CBarrageView extends FrameLayout {
          * should init in prepared
          **/
         void onPrepared(CBarrageView view);
+
+        /**
+         * 弹幕空闲Nms后回调，在此函数设置循环数组
+         * should set loop queue here!!!
+         */
+        void onIdle(long idleTimeMs, CBarrageView view);
     }
     private CBarrageViewListener mListener;
     public void setListener(CBarrageViewListener listener) {
@@ -51,6 +84,8 @@ public class CBarrageView extends FrameLayout {
 
     private boolean mIsStarted;
     private boolean mIsPrepared;
+    private boolean mIsPaused;
+    private boolean mIsReleasing;
 
     private int mRowNum = 1;
     private int mRowGap;
@@ -62,7 +97,7 @@ public class CBarrageView extends FrameLayout {
 
 
     /**
-     * @param mode 设置弹幕的布局方式 正常/平均
+     * @param mode 设置弹幕的布局方式 正常(default)/平均
      **/
     public void setMode(int mode) {
         mBarrageMode = mode;
@@ -79,6 +114,12 @@ public class CBarrageView extends FrameLayout {
     public CBarrageDataAdapter getAdapter() {
         return mAdapter;
     }
+
+    public void setLoopQueue(List list) {
+        mLoopQueue = new ArrayDeque<>(list);
+    }
+
+
 
     /**
      * @param speed 划完一行需要的时间(ms)，行宽为弹幕视图宽度
@@ -142,7 +183,7 @@ public class CBarrageView extends FrameLayout {
 
 
     /**
-     * @param gravity Gravity.TOP / Gravity.CENTER / Gravity.BOTTOM
+     * @param gravity Gravity.TOP / Gravity.CENTER(default) / Gravity.BOTTOM
      */
     public void setItemGravity(int gravity) {
         mItemGravity = gravity;
@@ -162,6 +203,7 @@ public class CBarrageView extends FrameLayout {
         for (int i = 0; i < mRows.size(); ++i) {
             CBarrageRow row = mRows.get(i);
             row.setContainerView(this);
+            row.setBarrageView(this);
 
             row.setIndex(i);
             row.setWidth(getWidth());
@@ -198,6 +240,34 @@ public class CBarrageView extends FrameLayout {
     private void initView() {
         createRowsIfNotExist();
         getViewTreeObserver().addOnGlobalLayoutListener(observer);
+        postDelayed(mCheckRowIdleTask, 50);
+    }
+
+    private Runnable mCheckRowIdleTask = new Runnable() {
+        @Override
+        public void run() {
+            if (mIsReleasing) {
+                return;
+            }
+            checkRowIdle();
+            postDelayed(this, 50);
+        }
+    };
+
+    private void checkRowIdle() {
+        onRowIdle(null);
+    }
+
+    public boolean isPaused() {
+        return mIsPaused;
+    }
+
+    public boolean isStarted() {
+        return mIsStarted;
+    }
+
+    public boolean isLooping() {
+        return mIsLoopingMode;
     }
 
     public void start() {
@@ -207,15 +277,45 @@ public class CBarrageView extends FrameLayout {
         }
     }
 
+    private static final boolean FitPC = true;
     public void pause() {
+        Log.d(TAG, "stop");
+        if (FitPC) {
+            pauseLikePC();
+            return;
+        }
+        mIsPaused = true;
         for (int i = 0; i < mRows.size(); ++i) {
             mRows.get(i).pause();
         }
     }
 
     public void resume() {
+        if (FitPC) {
+            resumeLikePC();
+            return;
+        }
+        mIsPaused = false;
         for (int i = 0; i < mRows.size(); ++i) {
             mRows.get(i).resume();
+        }
+    }
+
+    void pauseLikePC() {
+        mIsPaused = true;
+        // 为了和PC统一，让动画走完
+    }
+
+    void resumeLikePC() {
+        // @bugfix 曾经暂停过，会导致空闲循环停止触发，主动开启
+        Log.d(TAG, "pause "+mIsPaused+"|"+" timerstared "+mIsIdleTimerStarted);
+        mIsPaused = false;
+        if (! mIsIdleTimerStarted) {
+            Log.d(TAG, "start");
+            mIdleCountDownTimer.start();
+            mIsIdleTimerStarted = true;
+
+            onRowIdle(null);
         }
     }
 
@@ -227,22 +327,61 @@ public class CBarrageView extends FrameLayout {
         }
     }
 
+    public void release() {
+        mIsReleasing = true;
+        removeCallbacks(mCheckRowIdleTask);
+        // clear would release barrage view animations
+        clear();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mIdleCountDownTimer.cancel();
+        mIsIdleTimerStarted = false;
+    }
+
+    private long lastTime = 0;
     /**
      * Idle row callback, show next.
+     * @param row if row is null, means check and get the idle row inside.
      **/
-    public void onRowIdle(CBarrageRow row) {
-        if (mIsPrepared == false || mIsStarted == false) {
+    public void onRowIdle(@Nullable CBarrageRow row) {
+        row = getIdleRow();
+        if (row == null) {
+            return;
+        }
+        row.onItemUpdate(null);
+
+        if (mIsPrepared == false || mIsStarted == false || mIsPaused) {
             return;
         }
         if (! mPendingPriorityQueue.isEmpty()) {
             // IdleRow would not be null here!
-            addBarrageToRow(getIdleRow(), mPendingPriorityQueue.poll());
+            addBarrageToRow(row, mPendingPriorityQueue.poll());
             return;
         }
         if (! mPendingQueue.isEmpty()) {
             // IdleRow would not be null here!
-            addBarrageToRow(getIdleRow(), mPendingQueue.poll());
+            addBarrageToRow(row, mPendingQueue.poll());
             return;
+        }
+        if (mIsLoopingMode) {
+            // loop mode
+            long currentTime = SystemClock.currentThreadTimeMillis();
+            if (mLoopQueue.isEmpty() || SystemClock.currentThreadTimeMillis() - lastTime < LoopInterval) {
+                return;
+            } else {
+                lastTime = currentTime;
+                addBarrageToRowForLoop(row, mLoopQueue.poll());
+            }
+            return;
+        }
+        // All Idle
+        if (! mIsIdleTimerStarted) {
+            Log.d(TAG, "idle timer start");
+            mIdleCountDownTimer.start();
+            mIsIdleTimerStarted = true;
         }
     }
 
@@ -251,13 +390,17 @@ public class CBarrageView extends FrameLayout {
             return null;
         }
         View view = mAdapter.createView(this, getViewFromCache(obj), obj);
-        // reset
-        if (view != null) {
-            view.setX(0);
-            view.setY(0);
+        if (view == null) {
+            return null;
         }
+        // reset
+        view.setX(0);
+        view.setY(0);
+
         // add view to container
-        addView(view);
+        if (view.getParent() != this) {
+            addView(view);
+        }
         return view;
     }
 
@@ -277,8 +420,13 @@ public class CBarrageView extends FrameLayout {
         if (mAdapter == null) {
             return;
         }
+        Log.d(TAG, "loopmode " + mIsLoopingMode);
+        if (mIsLoopingMode) {
+            mLoopQueue.add(obj);
+            onRowIdle(null);
+        }
         // remove view from container
-        removeView(view);
+        // removeView(view);
         mRecycleBin.add(view);
         mAdapter.destroyView(this, obj, view);
     }
@@ -310,7 +458,7 @@ public class CBarrageView extends FrameLayout {
      **/
     void addBarrage(Object obj) {
         Log.d(TAG, "add pendingsize "+mPendingQueue.size());
-        if (mIsStarted == false || mIsPrepared == false) {
+        if (mIsStarted == false || mIsPrepared == false || mIsPaused) {
             mPendingQueue.add(obj);
             return;
         }
@@ -332,7 +480,7 @@ public class CBarrageView extends FrameLayout {
      * add a more high level barrage which would be added as fast
      **/
     void addPriorityBarrage(Object obj) {
-        if (mIsStarted == false || mIsPrepared == false) {
+        if (mIsStarted == false || mIsPrepared == false || mIsPaused) {
             mPendingPriorityQueue.add(obj);
             return;
         }
@@ -350,6 +498,44 @@ public class CBarrageView extends FrameLayout {
         addBarrageToRow(row, obj);
     }
 
+    @NonNull
+    public CBarrageRow peekNextInsertRow() {
+        CBarrageRow row = getIdleRow();
+        if (row != null) {
+            return row;
+        } else {
+            // no idle rows add to queue.
+            List<CBarrageRow> rows = getMinimumPendingRowsInRows(mRows);
+            if (rows.size() == 1) {
+                row = rows.get(0);
+            } else {
+                // scale 10 times to make random more random
+                row = rows.get(getRandomInt(0, rows.size() * 10 - 1) / 10);
+            }
+            return row;
+        }
+    }
+
+    /**
+     * add the barrage to the peek row !!!
+     * @param rowIndex
+     * @param obj
+     */
+    void addBarrageToRow(int rowIndex, Object obj) {
+        mIdleCountDownTimer.cancel();
+        mIsIdleTimerStarted = false;
+        mIsLoopingMode = false;
+
+        if (rowIndex < 0 || rowIndex >= mRows.size()) {
+            return;
+        }
+        CBarrageRow row = mRows.get(rowIndex);
+        if (row == null) {
+            return;
+        }
+        row.appendPriorityItem(obj);
+    }
+
     /**
      * 一奇葩需求，动画要消失到插入的行，但事实上，非常复杂，当插入的动画形成队列，
      * 此时要预判队列里所有动画要插入的行，这非常困难，因为下一次插入的行，与队列中前面的弹幕的宽度相关。
@@ -361,7 +547,7 @@ public class CBarrageView extends FrameLayout {
     CBarrageRow addRowBarrage(Object obj) {
         CBarrageRow row = getIdleRow();
         if (row != null) {
-            if (mIsStarted == false || mIsPrepared == false) {
+            if (mIsStarted == false || mIsPrepared == false || mIsPaused) {
                 row.appendPriorityItem(obj);
             } else {
                 // show directly
@@ -376,7 +562,7 @@ public class CBarrageView extends FrameLayout {
                 // scale 10 times to make random more random
                 row = rows.get(getRandomInt(0, rows.size() * 10 - 1) / 10);
             }
-            if (mIsStarted == false || mIsPrepared == false) {
+            if (mIsStarted == false || mIsPrepared == false || mIsPaused) {
                 row.appendPriorityItem(obj);
             } else {
                 row.appendPriorityItem(obj);
@@ -395,9 +581,22 @@ public class CBarrageView extends FrameLayout {
     }
 
     private void addBarrageToRow(CBarrageRow row, Object obj) {
+        mIdleCountDownTimer.cancel();
+        mIsIdleTimerStarted = false;
+        mIsLoopingMode = false;
         row.appendItem(obj);
     }
 
+    private void addBarrageToRowForLoop(CBarrageRow row, Object obj) {
+        mIdleCountDownTimer.cancel();
+        mIsIdleTimerStarted = false;
+        row.appendItem(obj);
+    }
+
+    /**
+     * according to the BarrageMode to get an idle row
+     * @return null if no idle row
+     */
     private CBarrageRow getIdleRow() {
         if (mBarrageMode == NORMAL) {
             return getFirstIdleRow();
@@ -500,7 +699,7 @@ public class CBarrageView extends FrameLayout {
             return 0;
         }
         int a =  new Random().nextInt(max)%(max-min+1) + min;
-        Log.d(TAG, String.format("max %d int %d a %d", max, min, a));
+        // NLog.d(TAG, String.format("max %d int %d a %d", max, min, a));
         return a;
     }
 

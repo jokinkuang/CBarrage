@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Queue;
@@ -25,7 +24,7 @@ public class CBarrageRow {
     private Queue<Object> mPendingPriorityQueue = new ArrayDeque<>(100);
 
     @NonNull
-    private WeakReference<ViewGroup> mContainerView = new WeakReference<ViewGroup>(null);
+//    private WeakReference<ViewGroup> mContainerView = new WeakReference<ViewGroup>(null);
 
     private int mIndex = -1;
 
@@ -52,9 +51,7 @@ public class CBarrageRow {
     }
 
 
-    private CBarrageItem mFirstItem;
-    private CBarrageItem mCenterItem;
-    private CBarrageItem mLastItem;
+    private CBarrageView mBarrageView;
 
     public int getHeight() {
         return mHeight;
@@ -145,7 +142,11 @@ public class CBarrageRow {
     }
 
     public void setContainerView(ViewGroup view) {
-        mContainerView = new WeakReference<ViewGroup>(view);
+//        mContainerView = new WeakReference<ViewGroup>(view);
+    }
+
+    public void setBarrageView(CBarrageView view) {
+        mBarrageView = view;
     }
 
     public void pause() {
@@ -164,11 +165,13 @@ public class CBarrageRow {
         mPendingPriorityQueue.clear();
         while (mItems.size() > 0) {
             CBarrageItem item = mItems.poll();
-            if (mListener != null && item.getContentView() != null) {
-                mListener.onViewDestroy(this, item.getData(), item.getContentView());
+            if (item != null) {
+                if (mListener != null && item.getContentView() != null) {
+                    mListener.onViewDestroy(this, item.getData(), item.getContentView());
+                }
+                item.clear();
+                mRecycleBin.add(item);
             }
-            item.clear();
-            mRecycleBin.add(item);
         }
     }
 
@@ -184,16 +187,17 @@ public class CBarrageRow {
         }
 
         CBarrageItem item = obtainBarrageItem();
-        item.setRow(this);
-        item.setData(obj);
-        item.setContentView(view);
-        item.setDistance(mWidth);
-        item.setSpeed(mItemSpeed);
-        item.setGravity(mItemGravity);
-        item.setListener(mItemListener);
-        item.start();
-
-        mItems.addLast(item);
+        if (item != null) {
+            item.setRow(this);
+            item.setData(obj);
+            item.setContentView(view);
+            item.setDistance(mWidth);
+            item.setSpeed(mItemSpeed);
+            item.setGravity(mItemGravity);
+            item.setListener(mItemListener);
+            item.start();
+            mItems.addLast(item);
+        }
         Log.d(TAG, String.format("distance %d speed %d", mWidth, mItemSpeed));
     }
 
@@ -203,7 +207,7 @@ public class CBarrageRow {
      * @param obj
      */
     public void appendPriorityItem(Object obj) {
-        if (! mPendingPriorityQueue.isEmpty()) {
+        if (! mPendingPriorityQueue.isEmpty() || mBarrageView.isPaused() || ! mBarrageView.isStarted()) {
             mPendingPriorityQueue.add(obj);
             return;
         }
@@ -223,13 +227,13 @@ public class CBarrageRow {
 
     public void onItemUpdate(CBarrageItem item) {
         if (isIdle()) {
-            if (! mPendingPriorityQueue.isEmpty()) {
+            if (! mPendingPriorityQueue.isEmpty() && mBarrageView.isPaused() == false && mBarrageView.isStarted()) {
                 appendItem(mPendingPriorityQueue.poll());
                 return;
             }
-            if (mListener != null) {
-                mListener.onRowIdle(this);
-            }
+            // if (mListener != null) {
+            //     mListener.onRowIdle(this);
+            // }
         }
     }
 
@@ -255,7 +259,7 @@ public class CBarrageRow {
         }
         //  |---[ItemWidth ItemGap]--|
         if (contentView.getX() + contentView.getWidth() + mItemGap <= mWidth) {
-            // Log.d(TAG, String.format("Idle x %f l %d w %d g %d sw %d", contentView.getX(), contentView.getLeft(),
+            // NLog.d(TAG, String.format("Idle x %f l %d w %d g %d sw %d", contentView.getX(), contentView.getLeft(),
             //         contentView.getWidth(), mItemGap, mWidth));
             if (contentView.getX() == 0) {
                 // means the last item was adding
@@ -330,7 +334,7 @@ public class CBarrageRow {
 
         @Override
         public void onAnimationUpdate(CBarrageItem item) {
-            onItemUpdate(item);
+            // onItemUpdate(item);
         }
     }
 

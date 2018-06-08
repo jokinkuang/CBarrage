@@ -2,8 +2,6 @@ package com.jokin.cbarrage.cbarrage;
 import android.content.Context;
 import android.view.WindowManager;
 
-import java.util.Random;
-
 /**
  * Created by jokinkuang on 2017/9/11.
  */

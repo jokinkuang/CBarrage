@@ -2,7 +2,6 @@ package com.jokin.cbarrage;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
@@ -17,9 +16,7 @@ import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
-import com.jokin.cbarrage.cbarrage.CBarrageRow;
 import com.jokin.cbarrage.cbarrage.CBarrageView;
 
 import java.util.Timer;
@@ -113,6 +110,11 @@ public class MainActivity extends AppCompatActivity {
                 view.setMode(CBarrageView.AVERAGE);
 
                 view.start();
+            }
+
+            @Override
+            public void onIdle(long idleTimeMs, CBarrageView view) {
+
             }
         });
     }

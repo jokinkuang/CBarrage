@@ -2,7 +2,6 @@ package com.jokin.cbarrage.cbarrage;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -23,7 +22,7 @@ public class CBarrageItem {
     private Object mData;
     private CBarrageRow mRow;
     private WeakReference<View> mContentView;
-    private ObjectAnimator mAnimator = new ObjectAnimator();
+    private ValueAnimator mAnimator = new ValueAnimator();
     private AnimatorListener mAnimatorListener = new AnimatorListener();
     private TreeObserver observer = new TreeObserver(this);
 
@@ -121,11 +120,19 @@ public class CBarrageItem {
             return;
         }
 
+        mContentView.get().setFocusable(false);
+        mContentView.get().setEnabled(false);
+        mContentView.get().setAccessibilityDelegate(null);
+
         mContentView.get().setX(0);
         mContentView.get().setY(getTopByGravity(mGravity));
 
+        // NLog.d(TAG, "imageView width:"+mContentView.get().getWidth()+
+        //         "| minWidth:"+mContentView.get().getMinimumWidth()+
+        //         "| measureWidth:"+mContentView.get().getMeasuredWidth()+
+        //         "| distance:"+mDistance);
         mAnimator.setTarget(mContentView.get());
-        mAnimator.setPropertyName("translationX");
+        // mAnimator.setPropertyName("translationX");
         mAnimator.setFloatValues(mDistance, -mContentView.get().getWidth());
         mAnimator.setDuration(getDurationBySpeed(mSpeed));
 
@@ -203,7 +210,6 @@ public class CBarrageItem {
                 mItem.get().onLayoutFinish();
                 return;
             }
-            Log.d(TAG, "fetal error!!!");
         }
     }
 
@@ -211,6 +217,7 @@ public class CBarrageItem {
             implements ValueAnimator.AnimatorUpdateListener {
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
+            CBarrageItem.this.getContentView().setX((Float) animation.getAnimatedValue());
             if (mListener != null) {
                 mListener.onAnimationUpdate(CBarrageItem.this);
             }
