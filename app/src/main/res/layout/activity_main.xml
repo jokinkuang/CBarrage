@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,10 +10,7 @@
         android:id="@+id/barrageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="50dp"
-        android:layout_marginBottom="50dp"
         android:background="#20FF4081">
-
     </com.jokin.cbarrage.cbarrage.CBarrageView>
 
     <FrameLayout
@@ -32,52 +28,71 @@
     </FrameLayout>
 
     <LinearLayout
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/dumpBtn"
-            android:text="DumpMemory"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <Button
-            android:id="@+id/pauseBtn"
-            android:text="Pause"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <Button
-            android:id="@+id/resumeBtn"
-            android:text="Resume"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <Button
-            android:id="@+id/clearBtn"
-            android:text="Clear"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <Button
-            android:id="@+id/addBtn"
-            android:text="AddText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <Button
-            android:id="@+id/addPriorityBtn"
-            android:text="AddPriorityText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <Button
-            android:id="@+id/addImageBtn"
-            android:text="AddImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <Button
-            android:id="@+id/addBBBtn"
-            android:text="AddBB"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <Button
-            android:id="@+id/addByTimerBtn"
-            android:text="AddImageByTimer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>    </LinearLayout>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/addBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="文本"/>
+            <Button
+                android:id="@+id/addPriorityBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="优先级文本"/>
+
+            <Button
+                android:id="@+id/addImageBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="图片"/>
+            <Button
+                android:id="@+id/addBBBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="霸屏图片"/>
+
+            <Button
+                android:id="@+id/addByTimerBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="定时器"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/pauseBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="暂停"/>
+            <Button
+                android:id="@+id/resumeBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="恢复"/>
+            <Button
+                android:id="@+id/clearBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="清屏"/>
+            <Button
+                android:id="@+id/dumpBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAllCaps="false"
+                android:text="Dump"/>
+        </LinearLayout>
+    </LinearLayout>
 </FrameLayout>
