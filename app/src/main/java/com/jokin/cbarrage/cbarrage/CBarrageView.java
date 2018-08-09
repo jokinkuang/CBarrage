@@ -277,7 +277,8 @@ public class CBarrageView extends FrameLayout {
         }
     }
 
-    private static final boolean FitPC = true;
+    // 如果为true，表示暂停不会立即暂停，会等待当前屏幕中的弹幕消失；为false，表示立即暂停
+    private static final boolean FitPC = false;
     public void pause() {
         Log.d(TAG, "stop");
         if (FitPC) {
@@ -325,6 +326,7 @@ public class CBarrageView extends FrameLayout {
         for (int i = 0; i < mRows.size(); ++i) {
             mRows.get(i).clear();
         }
+        removeAllViews();
     }
 
     public void release() {
