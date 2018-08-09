@@ -10,7 +10,7 @@
         android:id="@+id/barrageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#20FF4081">
+        android:background="#09FF4081">
     </com.jokin.cbarrage.cbarrage.CBarrageView>
 
     <FrameLayout
@@ -64,7 +64,7 @@
                 android:id="@+id/addByTimerBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="定时器"/>
+                android:text="启动定时器"/>
         </LinearLayout>
 
         <LinearLayout

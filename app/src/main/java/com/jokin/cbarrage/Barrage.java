@@ -5,8 +5,26 @@ package com.jokin.cbarrage;
  */
 
 public class Barrage {
-    public static final String TEXT = "text";
-    public static final String IMAGE = "image";
+    private String mType;
+    private String mText;
 
-    public String type = TEXT;
+    public Barrage(String type) {
+        mType = type;
+    }
+
+    public String getType() {
+        return mType;
+    }
+
+    public void setType(String type) {
+        mType = type;
+    }
+
+    public String getText() {
+        return mText;
+    }
+
+    public void setText(String text) {
+        mText = text;
+    }
 }

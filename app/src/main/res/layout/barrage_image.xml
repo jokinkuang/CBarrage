@@ -2,24 +2,28 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="wrap_content"
-              android:layout_height="wrap_content">
+              android:layout_height="20dp">
 
-    <ImageView
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:background="@drawable/bbscreen_image_head"/>
+    <FrameLayout
+        android:layout_width="15dp"
+        android:layout_height="match_parent">
+        <ImageView
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:background="@drawable/bbscreen_image_head"/>
+    </FrameLayout>
 
     <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="3dp"
-        android:background="@drawable/barrage_bg"
-        >
+        android:layout_height="match_parent"
+        android:padding="3dp">
 
     <RelativeLayout
-        android:layout_width="150dp"
-        android:layout_height="100dp"
-        android:layout_marginLeft="90dp">
+        android:layout_width="20dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="15dp">
         <ImageView
             android:id="@+id/img"
             android:layout_width="wrap_content"
@@ -28,12 +32,12 @@
             android:scaleType="fitStart"/>
     </RelativeLayout>
     <TextView
-        android:layout_marginLeft="248dp"
+        android:layout_marginLeft="38dp"
         android:id="@+id/text"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:text="文本文本"
-        android:textSize="20sp"/>
+        android:textSize="10sp"/>
     </RelativeLayout>
 
 </FrameLayout>

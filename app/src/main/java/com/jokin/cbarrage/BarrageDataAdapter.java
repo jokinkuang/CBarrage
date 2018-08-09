@@ -1,5 +1,6 @@
 package com.jokin.cbarrage;
 
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,12 +17,21 @@ import com.jokin.cbarrage.cbarrage.CBarrageDataAdapter;
 public class BarrageDataAdapter extends CBarrageDataAdapter<Barrage> {
     private static final String TAG = "BarrageDataAdapter";
 
+    /**
+     * Barrage Templates
+     **/
+    public static class BarrageType {
+        public static final String TEXT = "text";
+        public static final String IMAGE = "image";
+        public static final String IMAGE_TEXT = "image_text";
+    }
+
     @Override
-    public View createView(ViewGroup root, View converView, Barrage obj) {
-        if (Barrage.TEXT.equals(obj.type)) {
-            return createTextBarrage(root, converView);
-        } else if (Barrage.IMAGE.equals(obj.type)) {
-            return createImageBarrage(root, converView);
+    public View createView(ViewGroup root, View converView, Barrage barrage) {
+        if (BarrageType.TEXT.equals(barrage.getType())) {
+            return createTextBarrage(root, converView, barrage);
+        } else if (BarrageType.IMAGE_TEXT.equals(barrage.getType())) {
+            return createImageTextBarrage(root, converView, barrage);
         }
         return null;
     }
@@ -33,21 +43,20 @@ public class BarrageDataAdapter extends CBarrageDataAdapter<Barrage> {
 
     @Override
     public boolean isViewFromObject(View view, Barrage obj) {
-        return view.getTag().equals(obj.type);
+        return view.getTag().equals(obj.getType());
     }
 
-    private int num = 0;
-    private View createTextBarrage(final ViewGroup root, View converView) {
+    private View createTextBarrage(final ViewGroup root, View converView, Barrage barrage) {
         if (converView != null) {
-            ((TextView)converView).setText("重用文本弹幕"+num);
+            ((TextView)converView).setText("复用View："+barrage.getText());
             converView.setX(0);
             Log.d(TAG, String.format("x %f y %f l %d t %d r %d",
                     converView.getX(), converView.getY(), converView.getLeft(), converView.getTop(), converView.getRight()));
             return converView;
         }
         TextView textView = new TextView(root.getContext());
-        num += 1;
-        textView.setText("这是一条弹幕"+num);
+        textView.setText("新建View："+barrage.getText());
+        textView.setTextColor(Color.BLACK);
         textView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,19 +64,18 @@ public class BarrageDataAdapter extends CBarrageDataAdapter<Barrage> {
                 Toast.makeText(root.getContext(), "clicked", Toast.LENGTH_SHORT).show();
             }
         });
-        textView.setTag(Barrage.TEXT);
+        textView.setTag(BarrageType.TEXT);
         return textView;
     }
 
-    private View createImageBarrage(ViewGroup root, View converView) {
+    private View createImageTextBarrage(ViewGroup root, View converView, Barrage barrage) {
         if (converView != null) {
-            ((TextView)converView.findViewById(R.id.text)).setText("重用图片弹幕"+num);
+            ((TextView)converView.findViewById(R.id.text)).setText("重用View："+barrage.getText());
             return converView;
         }
         View imageView = LayoutInflater.from(root.getContext()).inflate(R.layout.barrage_image, root, false);
-        ((TextView)imageView.findViewById(R.id.text)).setText("图片弹幕"+num);
-        num += 1;
-        imageView.setTag(Barrage.IMAGE);
+        ((TextView)imageView.findViewById(R.id.text)).setText("新建View："+barrage.getText());
+        imageView.setTag(BarrageType.IMAGE_TEXT);
         return imageView;
     }
 }

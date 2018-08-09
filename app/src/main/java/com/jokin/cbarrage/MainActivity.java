@@ -2,6 +2,7 @@ package com.jokin.cbarrage;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
@@ -22,16 +23,22 @@ import com.jokin.cbarrage.cbarrage.CBarrageView;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends AppCompatActivity {
+import static com.jokin.cbarrage.BarrageDataAdapter.*;
 
-    private CBarrageView mBarrageView;
-    private BarrageDataAdapter mBarrageAdapter;
+public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
+
+    private Context mContext;
     private FrameLayout mBBFrame;
     private Button mAddByTimerBtn;
+
+    private BarrageDataAdapter mBarrageAdapter;
+    private CBarrageView mBarrageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = this;
         setContentView(R.layout.activity_main);
         init();
     }
@@ -74,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.addBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addBarrage();
+                addTextBarrage();
             }
         });
         findViewById(R.id.addPriorityBtn).setOnClickListener(new View.OnClickListener() {
@@ -86,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.addImageBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addImageBarrage();
+                addImageTextBarrage();
             }
         });
         findViewById(R.id.addBBBtn).setOnClickListener(new View.OnClickListener() {
@@ -103,11 +110,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPrepared(CBarrageView view) {
                 view.setItemGap(10);
-                view.setRowNum(2);
+                view.setRowNum(3);
                 view.setItemGravity(Gravity.BOTTOM);
-                view.setRowHeight(150);
+                view.setRowHeight(35);  // Row is 25dp
                 view.setRowSpeed(8000);
-                view.setMode(CBarrageView.AVERAGE);
+                view.setMode(CBarrageView.NORMAL);
 
                 view.start();
             }
@@ -121,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
     private int num = 0;
 
-    private void addBarrage() {
+    private void addTextBarrage() {
         // TextView textView = new TextView(this);
         // num += 1;
         // textView.setText("这是一条弹幕"+num);
@@ -132,10 +139,10 @@ public class MainActivity extends AppCompatActivity {
         //         Toast.makeText(MainActivity.this, "clicked", Toast.LENGTH_SHORT).show();
         //     }
         // });
-        // mBarrageView.addBarrage(textView);
+        // mBarrageView.addTextBarrage(textView);
 
-        Barrage barrage = new Barrage();
-        barrage.type = Barrage.TEXT;
+        Barrage barrage = new Barrage(BarrageType.TEXT);
+        barrage.setText("这是一条普通弹幕"+(num++));
         mBarrageAdapter.addBarrage(barrage);
     }
 
@@ -150,25 +157,25 @@ public class MainActivity extends AppCompatActivity {
         //         Toast.makeText(MainActivity.this, "clicked", Toast.LENGTH_SHORT).show();
         //     }
         // });
-        Barrage barrage = new Barrage();
-        barrage.type = Barrage.TEXT;
+        Barrage barrage = new Barrage(BarrageType.TEXT);
+        barrage.setText("## 高级弹幕"+(num++));
         mBarrageAdapter.addPriorityBarrage(barrage);
     }
 
-    private void addImageBarrage() {
+    private void addImageTextBarrage() {
         // View view = this.getLayoutInflater().inflate(R.layout.barrage_image, mBarrageView, false);
         // ((TextView)view.findViewById(R.id.text)).setText("图片弹幕"+num);
         // num += 1;
-        // mBarrageView.addBarrage(view);
-        Barrage barrage = new Barrage();
-        barrage.type = Barrage.IMAGE;
+        // mBarrageView.addTextBarrage(view);
+        Barrage barrage = new Barrage(BarrageType.IMAGE_TEXT);
+        barrage.setText("图文");
         mBarrageAdapter.addBarrage(barrage);
     }
 
     private void addBBBarrage() {
         mBBFrame.setVisibility(View.VISIBLE);
 
-        CountDownTimer timer = new CountDownTimer(100, 100) {
+        CountDownTimer timer = new CountDownTimer(1000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
             }
@@ -181,8 +188,9 @@ public class MainActivity extends AppCompatActivity {
                 // ((TextView)view.findViewById(R.id.text)).setText("霸屏弹幕"+num);
                 // num += 1;
                 // CBarrageRow row = mBarrageView.addRowBarrage(view);
-                Barrage barrage = new Barrage();
-                barrage.type = Barrage.IMAGE;
+                Barrage barrage = new Barrage(BarrageType.IMAGE_TEXT);
+                barrage.setText("霸屏");
+                mBBFrame.setVisibility(View.GONE);
                 mBarrageAdapter.addBarrage(barrage);
 
                 // showBBAnimation(row.getLeft(), row.getTop());
@@ -196,13 +204,13 @@ public class MainActivity extends AppCompatActivity {
             Boolean b = (Boolean) mAddByTimerBtn.getTag();
             timer.cancel();
             if (b == null || !b) {
-                mAddByTimerBtn.setText("stop timer");
+                mAddByTimerBtn.setText("暂停定时器");
                 timer = new Timer();
                 timer.schedule(new AsyncAddTask(), 0, 200);
                 mAddByTimerBtn.setTag(true);
                 isStop = false;
             } else {
-                mAddByTimerBtn.setText("add by timer");
+                mAddByTimerBtn.setText("启动定时器");
                 mAddByTimerBtn.setTag(false);
                 isStop = true;
             }
@@ -218,12 +226,15 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 SystemClock.sleep(100);
+                final int finalI = i;
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        addImageBarrage();
-
-                        // mBarrageView.setItemGap(new Random().nextInt() % 100 + 50);
+                        if (finalI % 2 == 0) {
+                            addTextBarrage();
+                        } else {
+                            addImageTextBarrage();
+                        }
                     }
                 });
             }
